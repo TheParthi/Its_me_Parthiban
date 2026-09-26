@@ -15,6 +15,7 @@ import { MediaModule } from './media/media.module'
 import { NotificationsModule } from './notifications/notifications.module'
 import { PrismaModule } from './prisma/prisma.module'
 import { PublicModule } from './public/public.module'
+import { PublicCacheModule } from './public/public-cache.service'
 import { SearchModule } from './search/search.module'
 import { SecurityModule } from './security/security.module'
 import { SettingsModule } from './settings/settings.module'
@@ -29,6 +30,7 @@ import { UsersModule } from './users/users.module'
     AuditModule,
     NotificationsModule,
     SettingsModule,
+    PublicCacheModule,
     AuthModule,
     UsersModule,
     SecurityModule,

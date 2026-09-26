@@ -11,15 +11,19 @@
     "deploy": "npm run build && sh scripts/deploy.sh"
   },
   "dependencies": {
+    "@pg/shared": "*",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.1",
+    "dompurify": "^3.4.16",
     "framer-motion": "^13.4.4",
     "gsap": "^3.15.0",
     "lenis": "^1.3.26",
     "lucide-react": "^1.48.0",
+    "marked": "^18.0.14",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "three": "^0.186.1"
+    "three": "^0.186.1",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
