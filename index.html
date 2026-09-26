@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Parthiban Gunasekaran — Software Engineer</title>
+  <meta name="description" content="Parthiban Gunasekaran — software engineer building production backends, real-time systems and mobile apps. Currently shipping NexaRide at Dendo." />
+  <meta name="theme-color" content="#0b0d10" />
+  <meta property="og:title" content="Parthiban Gunasekaran — Software Engineer" />
+  <meta property="og:description" content="Production backends, real-time systems and mobile apps. Currently shipping NexaRide at Dendo." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b0d10'/><text x='50%' y='56%' text-anchor='middle' dominant-baseline='middle' font-family='monospace' font-size='30' font-weight='700' fill='%237cf2c4'>PG</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    // Apply saved theme before paint to avoid a flash.
+    try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav" id="top">
+    <div class="wrap nav__inner">
+      <a class="brand" href="#top" aria-label="Home"><span class="brand__mark">PG</span><span class="brand__name">parthiban.dev</span></a>
+      <nav class="nav__links" aria-label="Primary">
+        <a href="#about">About</a>
+        <a href="#experience">Experience</a>
+        <a href="#projects">Projects</a>
+        <a href="#skills">Skills</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <div class="nav__actions">
+        <button class="icon-btn" id="themeToggle" type="button" aria-label="Toggle colour theme">
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+        <a class="btn btn--sm" href="assets/Parthiban_Gunasekaran_Resume.pdf" target="_blank" rel="noopener">Resume</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero wrap">
+      <p class="status"><span class="dot"></span>Software Engineer Intern at Dendo · open to full-time SDE roles</p>
+      <h1 class="hero__title">
+        Hi, I'm <span class="accent">Parthiban</span>.<br />
+        I build software that runs in production.
+      </h1>
+      <p class="hero__lead">
+        Final-year CS student in Coimbatore, shipping <strong>NexaRide</strong> — a ride-hailing platform live on
+        Google Play and the App Store. I work across a TypeScript backend, real-time systems over WebSockets and
+        Redis, and the React / React Native apps people actually tap on.
+      </p>
+      <div class="hero__cta">
+        <a class="btn" href="#projects">See my work</a>
+        <a class="btn btn--ghost" href="mailto:gunasekaranparthiban31@gmail.com">Get in touch</a>
+      </div>
+
+      <div class="terminal" aria-label="Quick facts">
+        <div class="terminal__bar"><span></span><span></span><span></span><em>~/parthiban</em></div>
+        <pre><code><span class="t-p">$</span> whoami
+parthiban gunasekaran — software engineer
+<span class="t-p">$</span> cat now.txt
+<span class="t-k">role</span>      SWE Intern @ Dendo (Aug 2026 – present)
+<span class="t-k">shipping</span>  NexaRide · 368 REST endpoints · 77-model Postgres
+<span class="t-k">stack</span>     TypeScript · NestJS · Java · Python · React Native
+<span class="t-k">learning</span>  Go
+<span class="t-p">$</span> <span class="caret"></span></code></pre>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="wrap stats" aria-label="Highlights">
+      <div class="stat"><b data-count="368">368</b><span>REST endpoints on the NexaRide backend</span></div>
+      <div class="stat"><b data-count="600" data-suffix="+">600+</b><span>LeetCode problems solved in Java</span></div>
+      <div class="stat"><b data-count="3" data-suffix="×">3×</b><span>Hackathon winner</span></div>
+      <div class="stat"><b data-count="40" data-prefix="~" data-suffix="%">~40%</b><span>API latency cut via query tuning</span></div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="section wrap" id="about">
+      <h2 class="section__title"><span>01</span>About</h2>
+      <div class="about">
+        <div class="about__text">
+          <p>
+            I'm a final-year B.E. Computer Science (IoT) student at Sri Krishna College of Technology who likes
+            taking things apart to see how they work. Most of my time now goes into NexaRide, where I design,
+            build, debug and maintain code across the whole stack — from PostGIS queries and Redis pub/sub to
+            React Native screens — in two-week sprints with code review on every pull request.
+          </p>
+          <p>
+            I care about the unglamorous parts that keep software alive: tests, CI gates, crash telemetry,
+            zero-downtime deploys, and tracing a bug through client, API and database until the root cause is
+            obvious. Outside work I build systems-level side projects — computer-vision pipelines on a Raspberry Pi
+            that drive real hardware, and published research on edge-IoT devices.
+          </p>
+          <p>I use AI tools every day, and I review every AI-generated change before it ships.</p>
+        </div>
+        <aside class="card about__card">
+          <h3>Education</h3>
+          <p class="strong">B.E. Computer Science (Internet of Things)</p>
+          <p class="muted">Sri Krishna College of Technology, Coimbatore</p>
+          <p class="muted">CGPA 7.8 / 10 · Expected Oct 2027</p>
+          <hr />
+          <h3>Certifications</h3>
+          <ul class="plain">
+            <li>Microsoft Azure AZ-900</li>
+            <li>Cisco CCNA</li>
+            <li>Oracle Cloud AI Foundations</li>
+          </ul>
+          <hr />
+          <h3>Based in</h3>
+          <p class="muted">Coimbatore, India · open to Bengaluru, Hyderabad, Pune</p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- EXPERIENCE -->
+    <section class="section wrap" id="experience">
+      <h2 class="section__title"><span>02</span>Experience</h2>
+      <ol class="timeline">
+        <li class="job">
+          <div class="job__head">
+            <div>
+              <h3>Software Engineer Intern · <span class="accent">Dendo</span></h3>
+              <p class="muted">NexaRide ride-hailing platform &amp; Dendo delivery app</p>
+            </div>
+            <span class="job__date">Aug 2026 — Present</span>
+          </div>
+          <ul class="bullets">
+            <li>Ship features end to end on a 48-module service-oriented <b>TypeScript / NestJS</b> backend — 34 controllers, 55 services, <b>368 REST endpoints</b> over a <b>77-model PostgreSQL</b> schema.</li>
+            <li>Work on the real-time layer: a Socket.IO gateway that scales horizontally through a <b>Redis pub/sub</b> adapter, with transactional, idempotent writes to keep concurrent ride assignment correct.</li>
+            <li>Replaced a sequential one-at-a-time driver assignment with <b>zone-based distance-band broadcast matching</b>, cutting assignment latency; tuned slow relational and geospatial queries with targeted indexes.</li>
+            <li>Built client pieces across a Next.js web console and two React Native apps: 55 shared UI components, a typed <code>@nexaride/shared</code> contract package, live tracking with rAF-interpolated map markers, and 5-language localisation.</li>
+            <li>Added error boundaries and Crashlytics reporting that surfaced a class of <b>previously silent client failures</b>; contribute to 46 Jest / Supertest suites and a GitHub Actions pipeline gating lint, types and tests.</li>
+            <li>Services ship as Docker images to Terraform-provisioned infrastructure with <b>zero-downtime deploys</b> gated on a boot health check.</li>
+          </ul>
+          <ul class="tags"><li>TypeScript</li><li>NestJS</li><li>Prisma</li><li>PostgreSQL / PostGIS</li><li>Redis</li><li>Socket.IO</li><li>React Native</li><li>Next.js</li><li>Docker</li><li>Terraform</li><li>AWS</li></ul>
+        </li>
+        <li class="job">
+          <div class="job__head">
+            <div>
+              <h3>Java Developer Intern · <span class="accent">Pinnacle Labs</span></h3>
+              <p class="muted">Real-time seat availability &amp; booking</p>
+            </div>
+            <span class="job__date">Jun 2025 — Sep 2025</span>
+          </div>
+          <ul class="bullets">
+            <li>Built <b>5 concurrent Spring Boot REST services</b> (controller / service / repository) with JPA and Hibernate over MySQL, using transactional writes and locking to keep concurrent bookings correct.</li>
+            <li>Profiled slow endpoints, traced the cost to 4 inefficient SQL joins and fixed them with composite indexes — <b>about 40% faster</b> API responses under concurrent load.</li>
+          </ul>
+          <ul class="tags"><li>Java</li><li>Spring Boot</li><li>JPA / Hibernate</li><li>MySQL</li></ul>
+        </li>
+      </ol>
+    </section>
+
+    <!-- PROJECTS -->
+    <section class="section wrap" id="projects">
+      <h2 class="section__title"><span>03</span>Projects</h2>
+
+      <article class="feature card">
+        <div class="feature__body">
+          <p class="eyebrow">Featured · Production</p>
+          <h3>NexaRide</h3>
+          <p>
+            A full ride-hailing platform — rider app, driver app, web operations console and backend — live on
+            Google Play and the App Store. Real-time ride offers, driver location and ETA over WebSockets, geospatial
+            matching in PostGIS, and a typed contract package shared by web, mobile and server.
+          </p>
+          <ul class="tags"><li>NestJS</li><li>PostGIS</li><li>Redis pub/sub</li><li>React Native</li><li>Next.js</li><li>Terraform</li></ul>
+        </div>
+        <div class="feature__diagram" aria-hidden="true">
+          <svg viewBox="0 0 320 220" role="img">
+            <g class="d-node"><rect x="10" y="20" width="90" height="36" rx="8"/><text x="55" y="43">Rider app</text></g>
+            <g class="d-node"><rect x="10" y="92" width="90" height="36" rx="8"/><text x="55" y="115">Driver app</text></g>
+            <g class="d-node"><rect x="10" y="164" width="90" height="36" rx="8"/><text x="55" y="187">Web console</text></g>
+            <g class="d-node d-node--hi"><rect x="140" y="74" width="80" height="72" rx="10"/><text x="180" y="104">API +</text><text x="180" y="122">Sockets</text></g>
+            <g class="d-node"><rect x="250" y="40" width="62" height="36" rx="8"/><text x="281" y="63">Postgres</text></g>
+            <g class="d-node"><rect x="250" y="144" width="62" height="36" rx="8"/><text x="281" y="167">Redis</text></g>
+            <path class="d-edge" d="M100 38 C120 38 120 95 140 95"/>
+            <path class="d-edge" d="M100 110 L140 110"/>
+            <path class="d-edge" d="M100 182 C120 182 120 125 140 125"/>
+            <path class="d-edge" d="M220 95 C235 95 235 58 250 58"/>
+            <path class="d-edge" d="M220 125 C235 125 235 162 250 162"/>
+          </svg>
+        </div>
+      </article>
+
+      <div class="grid">
+        <article class="card project">
+          <p class="eyebrow">Computer vision · Research</p>
+          <h3>Automated Walnut Quality Inspection</h3>
+          <p>Real-time Python + OpenCV pipeline on embedded Linux that analyses a UV image stream, detects contamination, classifies quality grades and drives a GPIO-controlled actuator.</p>
+          <p class="note">Paper under peer review</p>
+          <ul class="tags"><li>Python</li><li>OpenCV</li><li>NumPy</li><li>Raspberry Pi</li><li>GPIO</li></ul>
+        </article>
+        <article class="card project">
+          <p class="eyebrow">Edge IoT · Published</p>
+          <h3>Emergency Lane Clearance System</h3>
+          <p>Embedded edge device that detects approaching emergency vehicles using thermal and humidity-aware vision sensing, so lanes can be cleared ahead of them.</p>
+          <p class="note">Published research</p>
+          <ul class="tags"><li>Embedded systems</li><li>Thermal sensing</li><li>Computer vision</li></ul>
+        </article>
+        <article class="card project">
+          <p class="eyebrow">Web3 · Hackathon winner</p>
+          <h3>TrustLance</h3>
+          <p>Trust-first freelance marketplace: funds locked in escrow before work starts and released per approved milestone, identity tied to Google sign-in plus a one-time wallet link, and end-to-end encrypted wallet-to-wallet messaging over XMTP.</p>
+          <p class="note">Winning build — GDG KSR Web3 Hackathon · team project</p>
+          <ul class="tags"><li>TypeScript</li><li>React</li><li>Node.js</li><li>Solidity</li><li>XMTP</li></ul>
+          <div class="links"><a href="https://github.com/TheParthi/TRTLance" target="_blank" rel="noopener">Code ↗</a></div>
+        </article>
+        <article class="card project">
+          <p class="eyebrow">AI agents · Fintech</p>
+          <h3>Loanify</h3>
+          <p>AI-driven loan automation for an NBFC. A master agent orchestrates KYC verification, sales, underwriting, document upload and sanction-letter agents; underwriting auto-approves, requests a salary slip or rejects based on credit score and limit, with an admin dashboard for live applications.</p>
+          <ul class="tags"><li>Next.js 14</li><li>TypeScript</li><li>Express</li><li>SQLite</li><li>PDFKit</li></ul>
+          <div class="links"><a href="https://github.com/TheParthi/Loanify" target="_blank" rel="noopener">Code ↗</a></div>
+        </article>
+        <article class="card project">
+          <p class="eyebrow">Full stack · Real-time</p>
+          <h3>DocVault</h3>
+          <p>Document management dashboard with single and bulk PDF upload, per-file progress and status, and a notification centre pushed live over Socket.IO and persisted in MySQL. PDF-only validation on both client and server.</p>
+          <ul class="tags"><li>React 19</li><li>Vite</li><li>Express 5</li><li>MySQL</li><li>Socket.IO</li></ul>
+          <div class="links"><a href="https://github.com/TheParthi/Digi_doc" target="_blank" rel="noopener">Code ↗</a></div>
+        </article>
+        <article class="card project">
+          <p class="eyebrow">Security · GenAI</p>
+          <h3>Malware Detection &amp; Threat Response</h3>
+          <p>Static analysis of uploaded files, GenAI-based malware / benign classification, and SOAR-style automated incident response with severity and response-time logging, demoed through a Streamlit UI.</p>
+          <ul class="tags"><li>Python</li><li>Streamlit</li><li>Static analysis</li><li>Kali Linux</li></ul>
+          <div class="links"><a href="https://github.com/TheParthi/Malware-Detection-GenAI" target="_blank" rel="noopener">Code ↗</a></div>
+        </article>
+        <article class="card project">
+          <p class="eyebrow">Accessibility · Computer vision</p>
+          <h3>Real-Time Sign Language Interpreter</h3>
+          <p>Browser-based ASL interpreter: MediaPipe Holistic hand, 468-point face and 33-point pose tracking, motion detection between frames, live letter and number translation, and text-to-speech output. No install required.</p>
+          <p class="note">RAISE-26 Hackathon · team project</p>
+          <ul class="tags"><li>JavaScript</li><li>MediaPipe</li><li>Web Speech API</li></ul>
+          <div class="links">
+            <a href="https://sign-interpreter-five.vercel.app" target="_blank" rel="noopener">Live ↗</a>
+            <a href="https://github.com/TheParthi/Sign_Language" target="_blank" rel="noopener">Code ↗</a>
+          </div>
+        </article>
+        <article class="card project">
+          <p class="eyebrow">AI agents · RAG</p>
+          <h3>Customer Support Email Automation</h3>
+          <p>A LangGraph workflow of AI agents that watches a Gmail inbox, sorts each email into complaint, inquiry, feedback or unrelated, drafts replies, answers product questions with RAG over company documents, and quality-checks every draft before it is sent.</p>
+          <ul class="tags"><li>Python</li><li>LangChain</li><li>LangGraph</li><li>LangServe</li><li>Groq</li><li>Gmail API</li></ul>
+          <div class="links"><a href="https://github.com/TheParthi/Email_rag" target="_blank" rel="noopener">Code ↗</a></div>
+        </article>
+        <article class="card project">
+          <p class="eyebrow">Web3 security · LLMs</p>
+          <h3>Blockchain Security Monitor</h3>
+          <p>Python framework that monitors ERC-20 token allowances, flags high-risk approvals such as unlimited allowances, and uses an LLM to explain the risk in plain language. Modular agents, RPC retries and checksum address handling.</p>
+          <ul class="tags"><li>Python</li><li>Ethereum RPC</li><li>ERC-20</li><li>DeepSeek / Gemini / OpenAI</li></ul>
+          <div class="links"><a href="https://github.com/TheParthi/Security_monitor" target="_blank" rel="noopener">Code ↗</a></div>
+        </article>
+        <article class="card project">
+          <p class="eyebrow">Web3 · AI tooling</p>
+          <h3>BNB Chain AI Toolkit</h3>
+          <p>Toolkit for building AI-powered apps on BNB Chain: MCP servers that give AI assistants direct chain access, agents for DeFi protocols, market data, wallet tooling and ERC-8004 identity contracts.</p>
+          <ul class="tags"><li>TypeScript</li><li>MCP</li><li>BNB Chain</li><li>DeFi</li></ul>
+          <div class="links">
+            <a href="https://chain-tool-kit.vercel.app" target="_blank" rel="noopener">Live ↗</a>
+            <a href="https://github.com/TheParthi/chain_tool_kit" target="_blank" rel="noopener">Code ↗</a>
+          </div>
+        </article>
+      </div>
+      <p class="more"><a class="btn btn--ghost" href="https://github.com/TheParthi" target="_blank" rel="noopener">More on GitHub ↗</a></p>
+    </section>
+
+    <!-- SKILLS -->
+    <section class="section wrap" id="skills">
+      <h2 class="section__title"><span>04</span>Skills</h2>
+      <div class="skills">
+        <div class="card skill">
+          <h3>Languages</h3>
+          <ul class="tags"><li>TypeScript</li><li>JavaScript</li><li>Java</li><li>Python</li><li>SQL</li><li>C#</li><li>Bash</li><li>Go (learning)</li></ul>
+        </div>
+        <div class="card skill">
+          <h3>Backend &amp; systems</h3>
+          <ul class="tags"><li>Node.js</li><li>NestJS</li><li>Express</li><li>Spring Boot</li><li>JPA / Hibernate</li><li>REST</li><li>WebSockets</li><li>JWT &amp; RBAC</li><li>Concurrency</li></ul>
+        </div>
+        <div class="card skill">
+          <h3>Frontend &amp; mobile</h3>
+          <ul class="tags"><li>React</li><li>Next.js</li><li>React Native</li><li>Redux Toolkit</li><li>Tailwind CSS</li><li>i18n</li><li>Accessibility</li></ul>
+        </div>
+        <div class="card skill">
+          <h3>Data</h3>
+          <ul class="tags"><li>PostgreSQL</li><li>PostGIS</li><li>MySQL</li><li>Redis</li><li>MongoDB</li><li>Prisma</li><li>Query optimisation</li></ul>
+        </div>
+        <div class="card skill">
+          <h3>Cloud &amp; DevOps</h3>
+          <ul class="tags"><li>AWS (EC2, RDS, S3)</li><li>Azure</li><li>Docker</li><li>Terraform</li><li>GitHub Actions</li><li>pm2</li><li>Linux</li></ul>
+        </div>
+        <div class="card skill">
+          <h3>Quality</h3>
+          <ul class="tags"><li>Jest</li><li>Supertest</li><li>TDD</li><li>Crashlytics</li><li>Structured logging</li><li>Root-cause analysis</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACHIEVEMENTS -->
+    <section class="section wrap" id="achievements">
+      <h2 class="section__title"><span>05</span>Achievements</h2>
+      <ul class="wins">
+        <li class="card"><b>HackSprint 2026</b><span>Winner · iamneo / NIIT Venture</span></li>
+        <li class="card"><b>GDG KSR Web3 Hackathon</b><span>Winner · Shardeum</span></li>
+        <li class="card"><b>Pivot Challenge 2025</b><span>Winner · Bharati Vidyapeeth</span></li>
+        <li class="card"><b>600+ LeetCode</b><span>Java · DP, graphs, trees · 50 Days Badge 2026</span></li>
+      </ul>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="section wrap contact" id="contact">
+      <h2 class="section__title"><span>06</span>Contact</h2>
+      <div class="card contact__card">
+        <h3>Let's build something.</h3>
+        <p class="muted">I'm looking for full-time software engineering roles and internships. The fastest way to reach me is email.</p>
+        <div class="contact__row">
+          <a class="btn" href="mailto:gunasekaranparthiban31@gmail.com">gunasekaranparthiban31@gmail.com</a>
+          <button class="btn btn--ghost" type="button" id="copyEmail" data-email="gunasekaranparthiban31@gmail.com">Copy email</button>
+        </div>
+        <ul class="socials">
+          <li><a href="https://www.linkedin.com/in/parthiban-gunasekaran1159a5282" target="_blank" rel="noopener">LinkedIn ↗</a></li>
+          <li><a href="https://leetcode.com/u/Parthiban_G" target="_blank" rel="noopener">LeetCode ↗</a></li>
+          <li><a href="https://github.com/TheParthi" target="_blank" rel="noopener">GitHub ↗</a></li>
+          <li><a href="assets/Parthiban_Gunasekaran_Resume.pdf" target="_blank" rel="noopener">Resume (PDF) ↗</a></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer wrap">
+    <p>© <span id="year">2026</span> Parthiban Gunasekaran</p>
+    <a href="#top">Back to top ↑</a>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="script.js"></script>
+</body>
+</html>
