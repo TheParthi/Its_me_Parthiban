@@ -1,0 +1,19 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublicReadMediaOnly",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": [
+        "arn:aws:s3:::YOUR_BUCKET/profile/*",
+        "arn:aws:s3:::YOUR_BUCKET/project/*",
+        "arn:aws:s3:::YOUR_BUCKET/icon/*",
+        "arn:aws:s3:::YOUR_BUCKET/background/*",
+        "arn:aws:s3:::YOUR_BUCKET/document/*",
+        "arn:aws:s3:::YOUR_BUCKET/other/*"
+      ]
+    }
+  ]
+}

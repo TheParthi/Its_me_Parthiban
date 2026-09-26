@@ -20,20 +20,29 @@
   "jest": {
     "moduleFileExtensions": [
       "js",
+      "mjs",
       "json",
       "ts"
     ],
     "rootDir": ".",
     "testRegex": "test/.*\\.e2e-spec\\.ts$",
     "transform": {
-      "^.+\\.ts$": "ts-jest"
+      "^.+\\.(t|j|mj)s$": [
+        "ts-jest",
+        {
+          "tsconfig": "tsconfig.spec.json"
+        }
+      ]
     },
     "testEnvironment": "node",
     "setupFiles": [
       "<rootDir>/test/env.ts"
     ],
     "testTimeout": 30000,
-    "globalSetup": "<rootDir>/test/global-setup.ts"
+    "globalSetup": "<rootDir>/test/global-setup.ts",
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(htmlparser2|domhandler|domutils|dom-serializer|entities|domelementtype)/)"
+    ]
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1141.0",
