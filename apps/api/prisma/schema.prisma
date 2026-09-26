@@ -1,0 +1,458 @@
+// Portfolio platform schema.
+//
+// Content follows a draft/published pattern: every editable record keeps a
+// working `draft` (what the admin edits) and a `published` snapshot (what the
+// public API serves). Publishing copies draft → published in a transaction and
+// records a ContentVersion.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Access control
+// ---------------------------------------------------------------------------
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique // SUPER_ADMIN | ADMIN | EDITOR | ANALYST
+  label       String
+  system      Boolean          @default(true)
+  permissions RolePermission[]
+  users       AdminUser[]
+  createdAt   DateTime         @default(now())
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  key         String           @unique
+  description String           @default("")
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model AdminUser {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  name              String
+  passwordHash      String?   // null until an invite is accepted
+  roleId            String
+  role              Role      @relation(fields: [roleId], references: [id])
+  disabled          Boolean   @default(false)
+  /// AES-256-GCM encrypted TOTP secret (never stored in plain text).
+  totpSecretEnc     String?
+  totpEnabled       Boolean   @default(false)
+  failedLoginCount  Int       @default(0)
+  lockedUntil       DateTime?
+  lastLoginAt       DateTime?
+  passwordChangedAt DateTime?
+  invitedById       String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  sessions  AdminSession[]
+  tokens    AuthToken[]
+  media     MediaAsset[]
+  versions  ContentVersion[]
+  reads     NotificationRead[]
+}
+
+model AdminSession {
+  id               String    @id @default(cuid())
+  userId           String
+  user             AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// SHA-256 of the refresh token. The token itself is never stored.
+  refreshTokenHash String    @unique
+  /// Rotation family: reuse of an old token revokes the whole family.
+  familyId         String
+  remember         Boolean   @default(false)
+  userAgent        String    @default("") // browser/OS family only
+  ipPrefix         String    @default("") // truncated address, e.g. 203.0.113.0/24
+  createdAt        DateTime  @default(now())
+  lastUsedAt       DateTime  @default(now())
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  revokedReason    String?
+  rotatedAt        DateTime?
+  /// Last password confirmation; carried across rotations for "recent auth" checks.
+  authAt           DateTime  @default(now())
+
+  @@index([userId])
+  @@index([familyId])
+}
+
+enum AuthTokenType {
+  PASSWORD_RESET
+  INVITE
+  TWO_FACTOR_CHALLENGE
+  PREVIEW
+}
+
+model AuthToken {
+  id        String        @id @default(cuid())
+  type      AuthTokenType
+  userId    String
+  user      AdminUser     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// SHA-256 of the token.
+  tokenHash String        @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  meta      Json?
+  createdAt DateTime      @default(now())
+
+  @@index([userId, type])
+}
+
+// ---------------------------------------------------------------------------
+// Content
+// ---------------------------------------------------------------------------
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum DocumentKey {
+  PROFILE
+  HOMEPAGE
+  APPEARANCE
+  SEO
+  SETTINGS
+}
+
+/// Singleton documents: Profile, HomepageConfiguration, AppearanceSettings,
+/// SEOSettings and SiteSettings. `draft` / `published` are validated against
+/// the zod schemas in @pg/shared before every write.
+model SiteDocument {
+  key         DocumentKey   @id
+  draft       Json
+  published   Json?
+  status      ContentStatus @default(DRAFT)
+  publishedAt DateTime?
+  updatedById String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  title       String
+  order       Int           @default(0)
+  featured    Boolean       @default(false)
+  status      ContentStatus @default(DRAFT)
+  draft       Json
+  published   Json?
+  publishedAt DateTime?
+  /// Scheduled publication time; a job publishes when it passes.
+  publishAt   DateTime?
+  draftUpdatedAt DateTime   @default(now())
+  deletedAt   DateTime?
+  updatedById String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  technologies ProjectTechnology[]
+
+  @@index([status, deletedAt, order])
+}
+
+model ProjectTechnology {
+  projectId String
+  name      String
+  order     Int     @default(0)
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, name])
+  @@index([name])
+}
+
+model SkillCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String   @default("#8B5CF6")
+  order     Int      @default(0)
+  skills    Skill[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Skill {
+  id          String        @id @default(cuid())
+  name        String
+  categoryId  String
+  category    SkillCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  order       Int           @default(0)
+  status      ContentStatus @default(DRAFT)
+  draft       Json
+  published   Json?
+  publishedAt DateTime?
+  draftUpdatedAt DateTime   @default(now())
+  deletedAt   DateTime?
+  updatedById String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([categoryId])
+  @@index([status, deletedAt, order])
+}
+
+model Experience {
+  id          String        @id @default(cuid())
+  order       Int           @default(0)
+  status      ContentStatus @default(DRAFT)
+  draft       Json
+  published   Json?
+  publishedAt DateTime?
+  draftUpdatedAt DateTime   @default(now())
+  deletedAt   DateTime?
+  updatedById String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status, deletedAt, order])
+}
+
+model Education {
+  id          String        @id @default(cuid())
+  order       Int           @default(0)
+  status      ContentStatus @default(DRAFT)
+  draft       Json
+  published   Json?
+  publishedAt DateTime?
+  draftUpdatedAt DateTime   @default(now())
+  deletedAt   DateTime?
+  updatedById String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status, deletedAt, order])
+}
+
+model Certification {
+  id          String        @id @default(cuid())
+  order       Int           @default(0)
+  status      ContentStatus @default(DRAFT)
+  draft       Json
+  published   Json?
+  publishedAt DateTime?
+  draftUpdatedAt DateTime   @default(now())
+  deletedAt   DateTime?
+  updatedById String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status, deletedAt, order])
+}
+
+model Achievement {
+  id          String        @id @default(cuid())
+  order       Int           @default(0)
+  status      ContentStatus @default(DRAFT)
+  draft       Json
+  published   Json?
+  publishedAt DateTime?
+  draftUpdatedAt DateTime   @default(now())
+  deletedAt   DateTime?
+  updatedById String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status, deletedAt, order])
+}
+
+/// Version history, written on every publish and restore.
+model ContentVersion {
+  id         String     @id @default(cuid())
+  entityType String     // profile | homepage | appearance | seo | project | skill | experience | …
+  entityId   String
+  version    Int
+  action     String     // publish | unpublish | restore | import
+  snapshot   Json
+  authorId   String?
+  author     AdminUser? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  createdAt  DateTime   @default(now())
+
+  @@unique([entityType, entityId, version])
+  @@index([entityType, entityId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Media
+// ---------------------------------------------------------------------------
+
+enum MediaCategory {
+  PROFILE
+  PROJECT
+  ICON
+  BACKGROUND
+  DOCUMENT
+  OTHER
+}
+
+model MediaAsset {
+  id           String        @id @default(cuid())
+  storageKey   String        @unique
+  url          String
+  fileName     String
+  originalName String
+  mimeType     String
+  size         Int
+  width        Int?
+  height       Int?
+  alt          String        @default("")
+  category     MediaCategory @default(OTHER)
+  checksum     String
+  uploadedById String?
+  uploadedBy   AdminUser?    @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([category, createdAt])
+  @@index([checksum])
+}
+
+// ---------------------------------------------------------------------------
+// Contact
+// ---------------------------------------------------------------------------
+
+enum MessageStatus {
+  NEW
+  READ
+  REPLIED
+  ARCHIVED
+  SPAM
+}
+
+model ContactMessage {
+  id        String        @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    MessageStatus @default(NEW)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([status, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Analytics — pseudonymous, no raw IPs, no free text from visitors.
+// ---------------------------------------------------------------------------
+
+model AnalyticsVisitor {
+  id          String   @id // random UUID from the browser, only after consent
+  firstSeenAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+  sessions    AnalyticsSession[]
+}
+
+model AnalyticsSession {
+  id             String            @id // random UUID per tab session
+  visitorId      String?
+  visitor        AnalyticsVisitor? @relation(fields: [visitorId], references: [id], onDelete: SetNull)
+  isNewVisitor   Boolean           @default(true)
+  startedAt      DateTime          @default(now())
+  lastSeenAt     DateTime          @default(now())
+  landingPath    String
+  currentPath    String
+  referrerDomain String?
+  source         String            // direct | search | social | referral | campaign
+  utmSource      String?
+  utmMedium      String?
+  utmCampaign    String?
+  device         String            // desktop | tablet | mobile | unknown
+  browser        String            @default("Other")
+  os             String            @default("Other")
+  country        String?
+  region         String?
+  pageViews      Int               @default(0)
+  eventCount     Int               @default(0)
+  engagedSec     Int               @default(0)
+  events         AnalyticsEvent[]
+
+  @@index([startedAt])
+  @@index([lastSeenAt])
+  @@index([visitorId])
+  @@index([source, startedAt])
+}
+
+model AnalyticsEvent {
+  id          BigInt           @id @default(autoincrement())
+  sessionId   String
+  session     AnalyticsSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  type        String
+  path        String
+  projectSlug String?
+  section     String?
+  target      String?
+  value       Int?
+  createdAt   DateTime         @default(now())
+
+  @@index([createdAt])
+  @@index([type, createdAt])
+  @@index([projectSlug, createdAt])
+  @@index([sessionId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Audit and notifications
+// ---------------------------------------------------------------------------
+
+/// Append-only. A database trigger rejects UPDATE and DELETE (see migration);
+/// only the retention job may prune rows, via a guarded function.
+model AdminAuditLog {
+  id           BigInt   @id @default(autoincrement())
+  actorId      String?
+  actorEmail   String?
+  action       String   // e.g. auth.login, project.publish
+  resourceType String?
+  resourceId   String?
+  success      Boolean  @default(true)
+  metadata     Json?
+  ipPrefix     String?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([actorId, createdAt])
+  @@index([action, createdAt])
+}
+
+model Notification {
+  id         String             @id @default(cuid())
+  type       String             // message | security | publish_failed | upload_failed | system
+  title      String
+  body       String             @default("")
+  link       String?
+  /// Only admins holding this permission can see the notification.
+  permission String
+  createdAt  DateTime           @default(now())
+  reads      NotificationRead[]
+
+  @@index([createdAt])
+}
+
+model NotificationRead {
+  notificationId String
+  userId         String
+  readAt         DateTime     @default(now())
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  user           AdminUser    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([notificationId, userId])
+}

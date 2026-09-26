@@ -1,34 +1,19 @@
 {
-  "name": "parthiban-portfolio",
+  "name": "parthiban-portfolio-platform",
   "private": true,
-  "version": "2.0.0",
-  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview",
-    "typecheck": "tsc -b --noEmit",
-    "deploy": "npm run build && sh scripts/deploy.sh"
-  },
-  "dependencies": {
-    "@react-three/drei": "^10.7.9",
-    "@react-three/fiber": "^9.8.1",
-    "framer-motion": "^13.4.4",
-    "gsap": "^3.15.0",
-    "lenis": "^1.3.26",
-    "lucide-react": "^1.48.0",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
-    "three": "^0.186.1"
-  },
-  "devDependencies": {
-    "@tailwindcss/vite": "^4.3.3",
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
-    "@types/three": "^0.186.0",
-    "@vitejs/plugin-react": "^6.1.1",
-    "tailwindcss": "^4.3.3",
-    "typescript": "^7.0.2",
-    "vite": "^8.3.1"
+    "dev:api": "npm run start:dev -w @pg/api",
+    "dev:admin": "npm run dev -w @pg/admin",
+    "dev:web": "npm run dev -w @pg/web",
+    "build": "npm run build -w @pg/shared && npm run build -w @pg/api && npm run build -w @pg/admin && npm run build -w @pg/web",
+    "test": "npm run test -w @pg/api",
+    "db:migrate": "npm run prisma:migrate -w @pg/api",
+    "db:seed": "npm run seed -w @pg/api",
+    "admin:create": "npm run admin:create -w @pg/api",
+    "deploy:web": "npm run deploy -w @pg/web"
   }
 }
