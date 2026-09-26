@@ -1,0 +1,128 @@
+import { AnimatePresence, motion } from 'framer-motion'
+import { Cpu, Network, ScanEye } from 'lucide-react'
+import { useState } from 'react'
+import { EASE } from '../../lib/motion'
+import { ArchitectureExplorer } from '../lab/ArchitectureExplorer'
+import { DispatchSimulator } from '../lab/DispatchSimulator'
+import { VisionDemo } from '../lab/VisionDemo'
+import { Reveal, SectionLabel, SplitHeading } from '../ui/Reveal'
+
+const EXPERIMENTS = [
+  {
+    id: 'arch',
+    code: 'EXP-A',
+    title: 'System Architecture Explorer',
+    blurb: 'How NexaRide fits together — clients, API, real-time gateway and data.',
+    icon: Network,
+    Component: ArchitectureExplorer,
+  },
+  {
+    id: 'dispatch',
+    code: 'EXP-B',
+    title: 'Real-Time Dispatch Simulator',
+    blurb: 'Distance-band broadcast matching, the algorithm behind ride assignment.',
+    icon: Cpu,
+    Component: DispatchSimulator,
+  },
+  {
+    id: 'vision',
+    code: 'EXP-C',
+    title: 'Computer Vision Demo',
+    blurb: 'Walnut grading and UV risk flags, from raw frame to annotated output.',
+    icon: ScanEye,
+    Component: VisionDemo,
+  },
+] as const
+
+export function Lab() {
+  const [active, setActive] = useState<(typeof EXPERIMENTS)[number]['id']>('arch')
+  const exp = EXPERIMENTS.find((e) => e.id === active)!
+
+  return (
+    <section id="lab" className="relative overflow-hidden px-5 py-32 sm:px-8 md:py-44">
+      <div aria-hidden className="bg-grid absolute inset-0 -z-10 opacity-40 [mask-image:linear-gradient(to_bottom,transparent,#000_20%,#000_80%,transparent)]" />
+      <div aria-hidden className="absolute left-1/2 top-40 -z-10 h-[500px] w-[900px] -translate-x-1/2 rounded-full bg-violet/10 blur-[160px]" />
+
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-10 lg:grid-cols-12">
+          <div className="lg:col-span-8">
+            <SectionLabel index="03">Engineering</SectionLabel>
+            <SplitHeading
+              text="Inside My Engineering Lab."
+              className="mt-8 font-display text-[clamp(2.8rem,7.5vw,6.5rem)] font-semibold leading-[0.92] tracking-[-0.04em]"
+            />
+          </div>
+          <Reveal className="self-end lg:col-span-4">
+            <p className="text-[15px] leading-relaxed text-mute">
+              Three working experiments drawn from real projects. They run entirely in your browser on sample data — explore the system, trigger a dispatch, inspect a detection.
+            </p>
+          </Reveal>
+        </div>
+
+        <Reveal y={50}>
+          <div className="mt-16 overflow-hidden rounded-[28px] border border-line bg-ink-2/80 backdrop-blur">
+            {/* Console header */}
+            <div className="flex items-center justify-between border-b border-line px-5 py-3 font-mono text-[11px] text-dim">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+                <span className="ml-3 hidden sm:inline">lab://parthiban/{exp.id}</span>
+              </div>
+              <span className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> running locally
+              </span>
+            </div>
+
+            {/* Experiment selector */}
+            <div role="tablist" aria-label="Experiments" className="grid border-b border-line md:grid-cols-3">
+              {EXPERIMENTS.map((e) => {
+                const on = e.id === active
+                const Icon = e.icon
+                return (
+                  <button
+                    key={e.id}
+                    role="tab"
+                    id={`tab-${e.id}`}
+                    aria-selected={on}
+                    aria-controls={`panel-${e.id}`}
+                    type="button"
+                    onClick={() => setActive(e.id)}
+                    className={`group relative flex items-start gap-4 border-line p-5 text-left transition-colors md:border-r md:last:border-r-0 ${on ? 'bg-ink/60' : 'hover:bg-ink/30'}`}
+                  >
+                    {on && <motion.span layoutId="lab-tab" className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-violet to-cyan" />}
+                    <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl border transition-colors ${on ? 'border-cyan/50 text-cyan' : 'border-line text-mute group-hover:text-fg'}`}>
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <span>
+                      <span className="font-mono text-[10px] tracking-widest text-dim">{e.code}</span>
+                      <span className={`mt-1 block font-display text-[15px] font-medium ${on ? 'text-fg' : 'text-fg/70'}`}>{e.title}</span>
+                      <span className="mt-1 hidden text-xs leading-relaxed text-mute md:block">{e.blurb}</span>
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+
+            <div className="p-4 sm:p-6">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={exp.id}
+                  role="tabpanel"
+                  id={`panel-${exp.id}`}
+                  aria-labelledby={`tab-${exp.id}`}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.45, ease: EASE }}
+                >
+                  <exp.Component />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  )
+}

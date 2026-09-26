@@ -1,29 +1,45 @@
 # Parthiban Gunasekaran — Portfolio
 
-Static personal portfolio site. Plain HTML, CSS and JavaScript — no build step, no dependencies.
+Live: https://theparthi.github.io/Its_me_Parthiban/
+
+React + TypeScript + Vite, styled with Tailwind CSS v4. Motion by Framer Motion,
+GSAP ScrollTrigger and Lenis; the hero core is Three.js via React Three Fiber
+(lazy-loaded, with an SVG fallback on mobile and for reduced motion).
+
+## Editing content
+
+All copy lives in `src/data/` — components never hard-code personal details.
+
+| File | What it holds |
+| --- | --- |
+| `profile.ts` | Name, links, hero roles, About copy, "Currently Exploring" |
+| `projects.ts` | Featured projects (showcase + detail modal) and the archive list |
+| `skills.ts` | Skill constellation: categories, notes and links between skills |
+| `experience.ts` | Timeline. `kind` labels Winner / Selected / Participated / Certified; `hidden: true` keeps an entry out until verified |
+
+The resume is `public/Parthiban_Gunasekaran_Resume.pdf` (keep the filename, or
+update `resumeUrl` in `profile.ts`).
+
+## Structure
 
 ```
-index.html     page content (edit text here)
-styles.css     design tokens, light/dark themes, layout
-script.js      theme toggle, scroll spy, reveal animations, copy-email
-assets/        resume PDF
+src/
+  data/                 content (edit here)
+  components/sections/  page sections: Nav, Hero, About, Projects, Lab, Skills, Experience, Exploring, Contact, Footer
+  components/previews/  animated SVG project previews
+  components/lab/       Engineering Lab experiments
+  components/three/     WebGL hero core + fallback
+  components/ui/        Reveal, Magnetic, Button, icons, cursor/grain
+  lib/                  motion hooks, smooth scroll
 ```
 
-## Run locally
+## Commands
 
 ```bash
-python3 -m http.server 8000
-# open http://localhost:8000
+npm install
+npm run dev        # local dev server
+npm run build      # typecheck + production build into dist/
+npm run deploy     # build and publish dist/ to the gh-pages branch
 ```
 
-## Deploy
-
-**GitHub Pages:** push to a repo named `<username>.github.io` (or any repo), then
-Settings → Pages → Deploy from branch → `main` / root.
-
-**Vercel / Netlify:** import the repo; no build command, output directory is the root.
-
-## Updating
-
-- Swap the resume: replace `assets/Parthiban_Gunasekaran_Resume.pdf` (keep the filename).
-- Colours live in the `:root` tokens at the top of `styles.css`.
+GitHub Pages serves the `gh-pages` branch.
