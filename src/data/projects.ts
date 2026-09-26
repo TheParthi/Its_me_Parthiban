@@ -143,7 +143,7 @@ export const featuredProjects: FeaturedProject[] = [
       'An intelligent quality-assessment system that combines UV imaging, computer vision, and embedded technology to support walnut quality analysis and aflatoxin risk assessment.',
     preview: 'vision',
     accent: '#B388FF',
-    tech: ['Python', 'YOLOv8', 'Computer Vision', 'UV Imaging', 'Arduino', 'IoT'],
+    tech: ['Python', 'YOLOv8', 'Computer Vision', 'UV Imaging', 'ESP32', 'IoT'],
     features: [
       { text: 'Real-time analysis of a UV image stream', status: 'shipped' },
       { text: 'Quality-grade classification of walnuts', status: 'shipped' },
@@ -153,7 +153,7 @@ export const featuredProjects: FeaturedProject[] = [
     architecture: [
       { layer: 'Capture', detail: 'UV illumination and camera capture walnuts on the line.' },
       { layer: 'Inference', detail: 'YOLOv8-based detection and grading in Python.' },
-      { layer: 'Control', detail: 'Microcontroller drives an actuator to route each nut by grade.' },
+      { layer: 'Control', detail: 'ESP32 drives an actuator to route each nut by grade.' },
       { layer: 'Monitor', detail: 'Device status and grading results for the operator.' },
     ],
     challenges: [
