@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useReducedMotion } from '../../lib/motion'
 
 // Warm, food-inspired Dendo showcase: a phone mockup with a menu and a live
@@ -33,10 +33,23 @@ export function DeliveryPreview() {
   }, [reduced])
   const shown = Math.min(step, STEPS.length - 1)
 
+  // Lay out on a fixed 800×520 canvas and scale it, like the SVG previews,
+  // so the composition holds together on a phone.
+  const box = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(1)
+  useEffect(() => {
+    const el = box.current
+    if (!el) return
+    const ro = new ResizeObserver(([e]) => setScale(e.contentRect.width / 800))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
   return (
+    <div ref={box} className="relative h-full w-full overflow-hidden">
     <div
-      className="relative flex h-full w-full items-center justify-center gap-6 overflow-hidden p-6"
-      style={{ background: 'radial-gradient(120% 90% at 20% 10%, #2a1608 0%, #120a05 55%, #0b0704 100%)' }}
+      className="absolute left-0 top-0 flex h-[520px] w-[800px] origin-top-left items-center justify-center gap-8 overflow-hidden p-6"
+      style={{ transform: `scale(${scale})`, background: 'radial-gradient(120% 90% at 20% 10%, #2a1608 0%, #120a05 55%, #0b0704 100%)' }}
       role="img"
       aria-label="Illustration of a food ordering app with live order tracking"
     >
@@ -80,7 +93,7 @@ export function DeliveryPreview() {
       </div>
 
       {/* Order tracker */}
-      <div className="relative z-10 hidden w-[240px] flex-col gap-4 sm:flex">
+      <div className="relative z-10 flex w-[240px] flex-col gap-4">
         <div className="rounded-2xl border border-white/10 bg-black/30 p-4 backdrop-blur">
           <div className="font-mono text-[10px] tracking-widest text-white/50">ORDER #D-2841</div>
           <ol className="mt-3 space-y-3">
@@ -116,6 +129,7 @@ export function DeliveryPreview() {
           </g>
         </svg>
       </div>
+    </div>
     </div>
   )
 }

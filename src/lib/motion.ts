@@ -19,6 +19,7 @@ function useMedia(query: string, fallback = false) {
 export const useReducedMotion = () => useMedia('(prefers-reduced-motion: reduce)')
 export const useFinePointer = () => useMedia('(hover: hover) and (pointer: fine)')
 export const useIsDesktop = () => useMedia('(min-width: 1024px)')
+export const useIsMobile = () => useMedia('(max-width: 767px)')
 
 /** True when the device can comfortably render the WebGL hero. */
 export function useCanRender3D() {

@@ -95,9 +95,9 @@ export function Hero() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 1 }}
-            className="mt-6 flex items-center gap-4 font-display text-[clamp(1.25rem,2.6vw,2rem)] font-medium text-fg/90"
+            className="mt-6 flex items-center gap-3 font-display text-[clamp(1rem,4.2vw,2rem)] font-medium text-fg/90 sm:gap-4 lg:text-[clamp(1.25rem,2.6vw,2rem)]"
           >
-            <span className="h-px w-10 shrink-0 bg-cyan" />
+            <span className="h-px w-6 shrink-0 bg-cyan sm:w-10" />
             <RotatingRole />
           </motion.div>
 

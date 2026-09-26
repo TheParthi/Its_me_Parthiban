@@ -78,6 +78,10 @@ body {
   80% { transform: translate(6%, -2%); }
 }
 
+@media (max-width: 767px) {
+  .grain { display: none; }
+}
+
 /* Light that follows the cursor. */
 .cursor-light {
   position: fixed;

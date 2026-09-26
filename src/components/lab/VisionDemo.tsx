@@ -51,9 +51,10 @@ export function VisionDemo() {
                     animate={{ opacity: hover === null || hover === w.id ? 1 : 0.35, scale: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.4, delay: i * 0.04 }}
-                    style={{ transformOrigin: `${w.x}px ${w.y}px` }}
-                    onPointerEnter={() => setHover(w.id)}
-                    onPointerLeave={() => setHover(null)}
+                    onPointerEnter={(e) => e.pointerType === 'mouse' && setHover(w.id)}
+                    onPointerLeave={(e) => e.pointerType === 'mouse' && setHover(null)}
+                    onClick={() => setHover((h) => (h === w.id ? null : w.id))}
+                    style={{ transformOrigin: `${w.x}px ${w.y}px`, cursor: 'pointer' }}
                     fontFamily="JetBrains Mono, monospace"
                   >
                     <rect x={w.x - s} y={w.y - s} width={s * 2} height={s * 2} rx="3" fill="transparent" stroke={c} strokeWidth={hover === w.id ? 2 : 1.3} />
@@ -89,7 +90,8 @@ export function VisionDemo() {
           </AnimatePresence>
         </svg>
         <div className="absolute left-3 top-3 rounded-full border border-violet/40 bg-ink/80 px-2.5 py-1 font-mono text-[10px] tracking-widest text-violet-200">
-          DEMONSTRATION · SAMPLE DATA · NO LIVE INFERENCE
+          <span className="sm:hidden">DEMO · SAMPLE DATA</span>
+          <span className="hidden sm:inline">DEMONSTRATION · SAMPLE DATA · NO LIVE INFERENCE</span>
         </div>
       </div>
 
@@ -134,7 +136,7 @@ export function VisionDemo() {
               <div className="text-fg/80">bbox: [{Math.round(focus.x - focus.r)}, {Math.round(focus.y - focus.r)}, {focus.r * 2}, {focus.r * 2}]</div>
             </>
           ) : (
-            <span className="text-dim">{mode === 'original' ? 'Switch to a detection view to inspect objects.' : 'Hover a box to inspect a detection.'}</span>
+            <span className="text-dim">{mode === 'original' ? 'Switch to a detection view to inspect objects.' : 'Hover or tap a box to inspect a detection.'}</span>
           )}
         </div>
         <p className="mt-4 text-[10px] leading-relaxed text-dim">

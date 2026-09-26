@@ -12,6 +12,7 @@ const EXPERIMENTS = [
     id: 'arch',
     code: 'EXP-A',
     title: 'System Architecture Explorer',
+    short: 'Architecture',
     blurb: 'How NexaRide fits together — clients, API, real-time gateway and data.',
     icon: Network,
     Component: ArchitectureExplorer,
@@ -20,6 +21,7 @@ const EXPERIMENTS = [
     id: 'dispatch',
     code: 'EXP-B',
     title: 'Real-Time Dispatch Simulator',
+    short: 'Dispatch sim',
     blurb: 'Distance-band broadcast matching, the algorithm behind ride assignment.',
     icon: Cpu,
     Component: DispatchSimulator,
@@ -28,6 +30,7 @@ const EXPERIMENTS = [
     id: 'vision',
     code: 'EXP-C',
     title: 'Computer Vision Demo',
+    short: 'Vision demo',
     blurb: 'Walnut grading and UV risk flags, from raw frame to annotated output.',
     icon: ScanEye,
     Component: VisionDemo,
@@ -75,7 +78,7 @@ export function Lab() {
             </div>
 
             {/* Experiment selector */}
-            <div role="tablist" aria-label="Experiments" className="grid border-b border-line md:grid-cols-3">
+            <div role="tablist" aria-label="Experiments" className="grid grid-cols-3 border-b border-line">
               {EXPERIMENTS.map((e) => {
                 const on = e.id === active
                 const Icon = e.icon
@@ -88,15 +91,18 @@ export function Lab() {
                     aria-controls={`panel-${e.id}`}
                     type="button"
                     onClick={() => setActive(e.id)}
-                    className={`group relative flex items-start gap-4 border-line p-5 text-left transition-colors md:border-r md:last:border-r-0 ${on ? 'bg-ink/60' : 'hover:bg-ink/30'}`}
+                    className={`group relative flex flex-col items-start gap-2 border-r border-line p-3 text-left transition-colors last:border-r-0 sm:p-4 md:flex-row md:gap-4 md:p-5 ${on ? 'bg-ink/60' : 'hover:bg-ink/30'}`}
                   >
                     {on && <motion.span layoutId="lab-tab" className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-violet to-cyan" />}
-                    <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl border transition-colors ${on ? 'border-cyan/50 text-cyan' : 'border-line text-mute group-hover:text-fg'}`}>
+                    <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl border transition-colors md:h-10 md:w-10 ${on ? 'border-cyan/50 text-cyan' : 'border-line text-mute group-hover:text-fg'}`}>
                       <Icon className="h-4 w-4" />
                     </span>
                     <span>
                       <span className="font-mono text-[10px] tracking-widest text-dim">{e.code}</span>
-                      <span className={`mt-1 block font-display text-[15px] font-medium ${on ? 'text-fg' : 'text-fg/70'}`}>{e.title}</span>
+                      <span className={`mt-1 block font-display text-[13px] font-medium leading-snug md:text-[15px] ${on ? 'text-fg' : 'text-fg/70'}`}>
+                        <span className="md:hidden">{e.short}</span>
+                        <span className="hidden md:inline">{e.title}</span>
+                      </span>
                       <span className="mt-1 hidden text-xs leading-relaxed text-mute md:block">{e.blurb}</span>
                     </span>
                   </button>
@@ -104,7 +110,7 @@ export function Lab() {
               })}
             </div>
 
-            <div className="p-4 sm:p-6">
+            <div className="p-3 sm:p-6">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={exp.id}

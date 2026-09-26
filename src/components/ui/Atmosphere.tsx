@@ -38,7 +38,7 @@ export function Atmosphere() {
 
   return (
     <>
-      <div className="cursor-light" aria-hidden />
+      {fine && <div className="cursor-light" aria-hidden />}
       <div className="grain" aria-hidden />
       {showCursor && (
         <motion.div

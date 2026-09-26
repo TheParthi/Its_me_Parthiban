@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
-import { EASE } from '../../lib/motion'
+import { EASE, useIsMobile } from '../../lib/motion'
 
 // NexaRide system map. Coordinates are in a 1000×560 design space and
 // rendered as percentages so the diagram scales with its container.
@@ -53,15 +53,73 @@ const W = 1000
 const H = 560
 const byId = Object.fromEntries(NODES.map((n) => [n.id, n]))
 
+const TIERS: { label: string; ids: string[] }[] = [
+  { label: 'Clients', ids: ['rider', 'driver', 'admin'] },
+  { label: 'Edge & core', ids: ['auth', 'api', 'ws'] },
+  { label: 'Data & services', ids: ['db', 'redis', 'maps'] },
+]
+
+/** Phone layout: the same system as stacked tiers, with linked parts lit up. */
+function TierMap({ sel, linked, onSelect }: { sel: string; linked: Set<string>; onSelect: (id: string) => void }) {
+  return (
+    <div className="rounded-2xl border border-line bg-ink p-3">
+      {TIERS.map((tier, t) => (
+        <div key={tier.label}>
+          {t > 0 && (
+            <div className="flex justify-center py-1.5" aria-hidden>
+              <span className="relative h-5 w-px overflow-hidden bg-line-2">
+                <span className="absolute inset-x-0 top-0 h-2 animate-[tier-flow_1.2s_linear_infinite] bg-cyan" />
+              </span>
+            </div>
+          )}
+          <div className="font-mono text-[9px] tracking-widest text-dim">{tier.label.toUpperCase()}</div>
+          <div className="mt-1.5 grid grid-cols-3 gap-1.5">
+            {tier.ids.map((id) => {
+              const n = byId[id]
+              const active = id === sel
+              const lit = linked.has(id)
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => onSelect(id)}
+                  aria-pressed={active}
+                  className="min-h-[56px] rounded-xl border px-2 py-2 text-left transition-all duration-300"
+                  style={{
+                    borderColor: active ? GROUP_COLOR[n.group] : lit ? `${GROUP_COLOR[n.group]}66` : 'rgba(255,255,255,.1)',
+                    background: active ? 'rgba(22,25,35,1)' : 'rgba(10,11,15,.9)',
+                    opacity: active || lit ? 1 : 0.55,
+                  }}
+                >
+                  <span className="flex items-center gap-1.5 font-display text-[12px] font-medium leading-tight">
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: GROUP_COLOR[n.group] }} />
+                    {n.label}
+                  </span>
+                  <span className="mt-0.5 block font-mono text-[9px] leading-tight text-mute">{n.tech}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      ))}
+      <style>{`@keyframes tier-flow { from { transform: translateY(-8px) } to { transform: translateY(20px) } }`}</style>
+    </div>
+  )
+}
+
 export function ArchitectureExplorer() {
   const [sel, setSel] = useState<string>('ws')
+  const mobile = useIsMobile()
   const node = byId[sel]
   const linked = new Set(EDGES.filter(([a, b]) => a === sel || b === sel).flat())
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
-      <div className="relative overflow-x-auto rounded-2xl border border-line bg-ink" data-lenis-prevent-touch>
-        <div className="relative min-w-[640px]" style={{ aspectRatio: `${W}/${H}` }}>
+    <div className="grid gap-4 md:gap-6 lg:grid-cols-[1fr_300px]">
+      {mobile ? (
+        <TierMap sel={sel} linked={linked} onSelect={setSel} />
+      ) : (
+      <div className="relative overflow-hidden rounded-2xl border border-line bg-ink">
+        <div className="relative" style={{ aspectRatio: `${W}/${H}` }}>
           <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden>
             <defs>
               <pattern id="ae-dots" width="24" height="24" patternUnits="userSpaceOnUse">
@@ -119,6 +177,7 @@ export function ArchitectureExplorer() {
           })}
         </div>
       </div>
+      )}
 
       <div className="rounded-2xl border border-line bg-ink p-5" aria-live="polite">
         <div className="eyebrow">Component</div>
@@ -145,7 +204,7 @@ export function ArchitectureExplorer() {
             </div>
           </motion.div>
         </AnimatePresence>
-        <p className="mt-6 font-mono text-[10px] leading-relaxed text-dim">Click any component. Animated paths show where data flows.</p>
+        <p className="mt-6 font-mono text-[10px] leading-relaxed text-dim">{mobile ? 'Tap any component. Lit parts are the ones it talks to.' : 'Click any component. Animated paths show where data flows.'}</p>
       </div>
     </div>
   )

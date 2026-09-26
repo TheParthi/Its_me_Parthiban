@@ -54,7 +54,7 @@ function ProjectRow({ project, flip, onOpen }: { project: FeaturedProject; flip:
           aria-label={`Explore ${project.title}`}
           data-cursor="view"
         >
-          <div ref={frame} className="relative aspect-[800/520] overflow-hidden rounded-[28px] border border-line bg-ink-2">
+          <div ref={frame} className="relative -mx-2 aspect-[800/520] overflow-hidden rounded-2xl border border-line bg-ink-2 sm:mx-0 sm:rounded-[28px]">
             <div className="h-full w-full transition-transform duration-[1.2s] ease-out-expo group-hover:scale-[1.035]">
               <Preview />
             </div>
@@ -227,7 +227,7 @@ export function Projects() {
           </div>
           <Reveal className="self-end lg:col-span-4 lg:col-start-9">
             <p className="text-[15px] leading-relaxed text-mute">
-              Four projects, from a ride-hailing platform in production to research on the edge. Hover a preview for the stack; open one for the architecture and the hard parts.
+              Four projects, from a ride-hailing platform in production to research on the edge. Hover or tap a preview for the stack; open one for the architecture and the hard parts.
             </p>
           </Reveal>
         </div>

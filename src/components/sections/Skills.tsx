@@ -79,7 +79,7 @@ export function Skills() {
           </div>
           <Reveal className="self-end lg:col-span-4 lg:col-start-9">
             <p className="text-[15px] leading-relaxed text-mute">
-              Technologies I have actually used. No percentages — hover a star to see where I used it and what it connects to.
+              Technologies I have actually used, and where I used them. No made-up percentages.
             </p>
           </Reveal>
         </div>
@@ -110,9 +110,9 @@ export function Skills() {
           </div>
         </Reveal>
 
-        {/* Constellation (tablet and up) */}
+        {/* Constellation (laptop and up) */}
         <Reveal y={40}>
-          <div className="relative mt-10 hidden overflow-hidden rounded-[28px] border border-line bg-ink-2/50 md:block">
+          <div className="relative mt-10 hidden overflow-hidden rounded-[28px] border border-line bg-ink-2/50 lg:block">
             <div className="relative" style={{ aspectRatio: `${W}/${H}` }}>
               <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden>
                 <defs>
@@ -226,8 +226,8 @@ export function Skills() {
           </div>
         </Reveal>
 
-        {/* Mobile: clean, touch-friendly grouped list */}
-        <div className="mt-10 space-y-8 md:hidden">
+        {/* Phones and tablets: clean, touch-friendly grouped list */}
+        <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:hidden">
           {skillCategories
             .filter((c) => filter === 'All' || filter === c)
             .map((c) => (

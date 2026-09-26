@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Play, RotateCcw } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useIsMobile } from '../../lib/motion'
 
 // A toy model of zone-based, distance-band broadcast dispatch: offers go to
 // every available driver in the nearest band at once; if nobody accepts, the
@@ -20,16 +21,18 @@ interface LogLine {
   tone?: 'ok' | 'warn' | 'info'
 }
 
-const W = 640
-const H = 420
-const BANDS = [90, 160, 240]
+// Landscape map on larger screens, portrait on phones so labels stay legible.
+const WIDE = { W: 640, H: 420, BANDS: [90, 160, 240] }
+const TALL = { W: 340, H: 440, BANDS: [70, 120, 175] }
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a)
-const makeDrivers = (): Driver[] =>
-  Array.from({ length: 11 }, (_, id) => ({ id, x: rand(40, W - 40), y: rand(40, H - 40), state: 'free' }))
+const makeDrivers = (W: number, H: number): Driver[] =>
+  Array.from({ length: 11 }, (_, id) => ({ id, x: rand(30, W - 30), y: rand(30, H - 30), state: 'free' }))
 
 export function DispatchSimulator() {
-  const [drivers, setDrivers] = useState<Driver[]>(makeDrivers)
+  const mobile = useIsMobile()
+  const { W, H, BANDS } = mobile ? TALL : WIDE
+  const [drivers, setDrivers] = useState<Driver[]>(() => makeDrivers(W, H))
   const [phase, setPhase] = useState<Phase>('idle')
   const [band, setBand] = useState(-1)
   const [pickup, setPickup] = useState({ x: W / 2, y: H / 2 })
@@ -55,7 +58,7 @@ export function DispatchSimulator() {
 
   const reset = () => {
     clear()
-    setDrivers(makeDrivers())
+    setDrivers(makeDrivers(W, H))
     setPhase('idle')
     setBand(-1)
     setAssigned(null)
@@ -63,14 +66,24 @@ export function DispatchSimulator() {
     setLog([{ t: '00.0', text: 'Reset. New drivers placed on the map.', tone: 'info' }])
   }
 
+  // Rotating a tablet or resizing across the breakpoint swaps the map shape.
+  const firstLayout = useRef(true)
+  useEffect(() => {
+    if (firstLayout.current) {
+      firstLayout.current = false
+      return
+    }
+    reset()
+  }, [mobile]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const request = () => {
     clear()
     start.current = performance.now()
-    const p = { x: rand(160, W - 160), y: rand(130, H - 130) }
-    const d = { x: p.x < W / 2 ? rand(W - 140, W - 50) : rand(50, 140), y: rand(50, H - 50) }
+    const p = { x: rand(W * 0.28, W * 0.72), y: rand(H * 0.3, H * 0.7) }
+    const d = { x: p.x < W / 2 ? rand(W * 0.78, W - 30) : rand(30, W * 0.22), y: rand(40, H - 40) }
     // Keep at least one driver within reach of the last band.
-    const ds = makeDrivers()
-    ds[0] = { ...ds[0], x: p.x + rand(-200, 200) * 0.6, y: p.y + rand(-150, 150) * 0.6 }
+    const ds = makeDrivers(W, H)
+    ds[0] = { ...ds[0], x: p.x + rand(-1, 1) * BANDS[1] * 0.6, y: p.y + rand(-1, 1) * BANDS[1] * 0.6 }
     setDrivers(ds)
     setPickup(p)
     setDrop(d)
