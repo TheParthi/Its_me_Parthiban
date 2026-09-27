@@ -12,7 +12,10 @@
     "seed": "tsx prisma/seed.ts",
     "admin:create": "tsx scripts/create-admin.ts",
     "test": "jest --runInBand",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build:scripts": "esbuild prisma/seed.ts --bundle --platform=node --target=node22 --external:@prisma/client --external:@node-rs/argon2 --log-level=warning --outfile=dist/scripts/seed.js && esbuild scripts/create-admin.ts --bundle --platform=node --target=node22 --external:@prisma/client --external:@node-rs/argon2 --log-level=warning --outfile=dist/scripts/create-admin.js",
+    "seed:prod": "node dist/scripts/seed.js",
+    "admin:create:prod": "node dist/scripts/create-admin.js"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -63,6 +66,7 @@
     "multer": "^2.4.0",
     "nodemailer": "^10.0.10",
     "otplib": "^12.0.1",
+    "prisma": "^6.19.3",
     "qrcode": "^1.5.4",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
@@ -87,7 +91,6 @@
     "@types/supertest": "^7.2.1",
     "@types/ua-parser-js": "^0.7.39",
     "jest": "^29.7.0",
-    "prisma": "^6.19.3",
     "supertest": "^7.3.0",
     "ts-jest": "^29.4.14",
     "ts-node": "^10.9.2",

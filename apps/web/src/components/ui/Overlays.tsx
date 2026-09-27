@@ -38,7 +38,7 @@ export function ConsentBar() {
         >
           <p className="min-w-0 flex-1 text-[13px] leading-snug text-fg/90">
             Allow anonymous analytics?
-            <span className="mt-0.5 block text-[11px] text-mute">No cookies, no personal data — it helps me see what's useful.</span>
+            <span className="mt-0.5 block text-[11px] text-mute">Stores a random ID in this browser to count return visits. No personal data.</span>
           </p>
           <div className="flex shrink-0 gap-2">
             <button

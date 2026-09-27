@@ -15,6 +15,7 @@ COPY . .
 RUN npm run build -w @pg/shared \
  && npx -w @pg/api prisma generate \
  && npm run build -w @pg/api \
+ && npm run build:scripts -w @pg/api \
  && npm run build -w @pg/admin
 RUN npm prune --omit=dev
 
