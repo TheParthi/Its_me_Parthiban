@@ -1,11 +1,14 @@
 import { motion, useSpring } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import { useContent } from '../../content/context'
 import { useFinePointer, useReducedMotion } from '../../lib/motion'
 
 /** Grain, cursor-following light and (on desktop) a custom cursor. */
 export function Atmosphere() {
+  const { bundle } = useContent()
   const fine = useFinePointer()
   const reduced = useReducedMotion()
+  const grain = bundle.appearance.showGrain !== false && !reduced
   const showCursor = fine && !reduced
 
   const x = useSpring(-100, { stiffness: 500, damping: 40, mass: 0.3 })
@@ -39,7 +42,7 @@ export function Atmosphere() {
   return (
     <>
       {fine && <div className="cursor-light" aria-hidden />}
-      <div className="grain" aria-hidden />
+      {grain && <div className="grain" aria-hidden />}
       {showCursor && (
         <motion.div
           aria-hidden

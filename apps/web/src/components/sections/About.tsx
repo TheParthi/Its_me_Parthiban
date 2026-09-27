@@ -1,6 +1,9 @@
 import { motion } from 'framer-motion'
+import type { PublicMedia } from '@pg/shared'
 import { useEffect, useRef } from 'react'
-import { about, profile } from '../../data/profile'
+import { useContent } from '../../content/context'
+import { safeHref } from '../../content/format'
+import { headingSize, PAD_DEFAULT, SectionBackdrop, sectionAttrs, useSection } from '../../content/sections'
 import { EASE, useReducedMotion } from '../../lib/motion'
 import { Reveal, SectionLabel, SplitHeading } from '../ui/Reveal'
 
@@ -8,11 +11,21 @@ import { Reveal, SectionLabel, SplitHeading } from '../ui/Reveal'
  * Abstract "digital portrait": a dot matrix whose dots swell along
  * interfering waves and bend towards the pointer. Not a photograph.
  */
-function SignalPortrait() {
+interface PortraitProps {
+  name: string
+  initials: string
+  degree: string
+  school: string
+  photo: PublicMedia | null
+}
+
+function SignalPortrait({ name, initials, degree, school, photo }: PortraitProps) {
   const ref = useRef<HTMLCanvasElement>(null)
   const reduced = useReducedMotion()
+  const photoUrl = safeHref(photo?.url)
 
   useEffect(() => {
+    if (photoUrl) return
     const canvas = ref.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
@@ -92,41 +105,63 @@ function SignalPortrait() {
       io.disconnect()
       window.removeEventListener('pointermove', move)
     }
-  }, [reduced])
+  }, [reduced, photoUrl])
 
   return (
     <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[28px] border border-line bg-ink-2">
-      <canvas ref={ref} className="absolute inset-0 h-full w-full" aria-hidden />
-      <div className="absolute inset-x-0 top-0 flex justify-between p-5 font-mono text-[10px] tracking-widest text-dim">
-        <span>SIGNAL / PORTRAIT</span>
-        <span>{profile.initials}-01</span>
+      {photoUrl ? (
+        <img
+          src={photoUrl}
+          alt={photo?.alt || name}
+          width={photo?.width ?? undefined}
+          height={photo?.height ?? undefined}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : (
+        <canvas ref={ref} className="absolute inset-0 h-full w-full" aria-hidden />
+      )}
+      <div className={`absolute inset-x-0 top-0 flex justify-between p-5 font-mono text-[10px] tracking-widest ${photoUrl ? 'bg-gradient-to-b from-ink/70 to-transparent text-fg/70' : 'text-dim'}`}>
+        <span>{photoUrl ? 'PORTRAIT' : 'SIGNAL / PORTRAIT'}</span>
+        <span>{initials}-01</span>
       </div>
       <div className="absolute inset-x-0 bottom-0 border-t border-line bg-ink/60 p-5 backdrop-blur">
-        <div className="font-display text-lg font-medium">{profile.name}</div>
-        <div className="mt-1 font-mono text-[11px] text-mute">{profile.education.degree}</div>
-        <div className="font-mono text-[11px] text-dim">{profile.education.school}</div>
+        <div className="font-display text-lg font-medium">{name}</div>
+        {degree && <div className="mt-1 font-mono text-[11px] text-mute">{degree}</div>}
+        {school && <div className="font-mono text-[11px] text-dim">{school}</div>}
       </div>
     </div>
   )
 }
 
 export function About() {
+  const { bundle } = useContent()
+  const profile = bundle.profile
+  const about = profile.about
+  const view = useSection('about')
+  const edu = bundle.education[0]
+  const degree = edu ? [edu.degree, edu.field].filter(Boolean).join(' ') : ''
+
   return (
-    <section id="about" className="relative px-5 py-32 sm:px-8 md:py-44">
+    <section id="about" className="sec-y relative px-5 sm:px-8" {...sectionAttrs(view, PAD_DEFAULT)}>
+      <SectionBackdrop view={view} />
       <div className="mx-auto max-w-7xl">
-        <SectionLabel index="01">Identity</SectionLabel>
+        <SectionLabel index={view.index}>{view.eyebrow || 'Identity'}</SectionLabel>
 
         <div className="mt-10 grid gap-16 lg:grid-cols-12">
           <div className="lg:col-span-7">
             <SplitHeading
-              text={about.heading}
-              className="font-display text-[clamp(3rem,8vw,7rem)] font-semibold leading-[0.92] tracking-[-0.04em]"
+              text={view.heading || about.heading || 'Beyond the Code.'}
+              className={`font-display ${headingSize.xl} font-semibold leading-[0.92] tracking-[-0.04em]`}
             />
-            <Reveal delay={0.1}>
-              <p className="mt-12 font-display text-[clamp(1.4rem,2.5vw,2.1rem)] font-normal leading-[1.3] tracking-tight text-fg/90">
-                {about.lead}
-              </p>
-            </Reveal>
+            {(view.description || about.lead) && (
+              <Reveal delay={0.1}>
+                <p className="mt-12 font-display text-[clamp(1.4rem,2.5vw,2.1rem)] font-normal leading-[1.3] tracking-tight text-fg/90">
+                  {view.description || about.lead}
+                </p>
+              </Reveal>
+            )}
             <div className="mt-10 grid gap-6 sm:grid-cols-2 sm:pl-[12%]">
               {about.paragraphs.map((p, i) => (
                 <Reveal key={i} delay={0.15 + i * 0.1}>
@@ -135,7 +170,7 @@ export function About() {
               ))}
             </div>
 
-            <Reveal delay={0.2}>
+            {about.facts.length > 0 && <Reveal delay={0.2}>
               <dl className="mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-4">
                 {about.facts.map((f) => (
                   <div key={f.k} className="bg-ink p-4">
@@ -144,21 +179,27 @@ export function About() {
                   </div>
                 ))}
               </dl>
-            </Reveal>
+            </Reveal>}
           </div>
 
           <div className="lg:col-span-4 lg:col-start-9 lg:pt-24">
             <Reveal y={60}>
-              <SignalPortrait />
+              <SignalPortrait
+                name={profile.fullName}
+                initials={profile.initials}
+                degree={degree}
+                school={edu?.institution ?? ''}
+                photo={profile.photo}
+              />
             </Reveal>
           </div>
         </div>
 
         {/* Engineering philosophy */}
-        <div className="mt-28 border-t border-line">
+        {about.principles.length > 0 && <div className="mt-28 border-t border-line">
           {about.principles.map((p, i) => (
             <motion.div
-              key={p.n}
+              key={p.title + i}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-10% 0px' }}
@@ -167,14 +208,14 @@ export function About() {
               tabIndex={0}
             >
               <span className="absolute inset-0 -z-10 origin-left scale-x-0 bg-gradient-to-r from-violet/10 via-cyan/5 to-transparent transition-transform duration-700 ease-out-expo group-hover:scale-x-100 group-focus:scale-x-100" />
-              <span className="font-mono text-sm text-cyan">{p.n}</span>
+              <span className="font-mono text-sm text-cyan">{String(i + 1).padStart(2, '0')}</span>
               <h3 className="font-display text-[clamp(2.2rem,5vw,4.5rem)] font-semibold uppercase leading-none tracking-[-0.03em] transition-transform duration-700 ease-out-expo group-hover:translate-x-3">
                 {p.title}
               </h3>
               <p className="col-start-2 text-base text-mute sm:col-start-3 sm:text-right sm:text-lg">{p.text}</p>
             </motion.div>
           ))}
-        </div>
+        </div>}
       </div>
     </section>
   )

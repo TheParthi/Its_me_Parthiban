@@ -1,7 +1,11 @@
 import { motion } from 'framer-motion'
 import { ArrowUpRight, Check, Copy, FileDown, Mail } from 'lucide-react'
-import { useState, type FormEvent } from 'react'
-import { profile } from '../../data/profile'
+import { useRef, useState, type FormEvent } from 'react'
+import { API_URL } from '../../content/api'
+import { useContent } from '../../content/context'
+import { resumeHref, safeHref } from '../../content/format'
+import { headingSize, SectionBackdrop, sectionAttrs, useSection } from '../../content/sections'
+import { track } from '../../lib/analytics'
 import { EASE } from '../../lib/motion'
 import { GitHubIcon, LinkedInIcon } from '../ui/Icons'
 import { Magnetic } from '../ui/Magnetic'
@@ -56,24 +60,94 @@ function Input({
   )
 }
 
+type SendState = { kind: 'idle' } | { kind: 'sending' } | { kind: 'sent' } | { kind: 'error'; message: string }
+
+/** Validates with the shared contactSubmitSchema (loaded on demand, it brings zod). */
+async function schemaErrors(payload: Record<string, unknown>): Promise<Partial<Record<Field, string>>> {
+  const { contactSubmitSchema } = await import('@pg/shared')
+  const r = contactSubmitSchema.safeParse(payload)
+  if (r.success) return {}
+  const out: Partial<Record<Field, string>> = {}
+  for (const issue of r.error.issues) {
+    const k = issue.path[0]
+    if ((k === 'name' || k === 'email' || k === 'subject' || k === 'message') && !out[k]) out[k] = issue.message
+  }
+  if (!Object.keys(out).length) out.message = 'Something about this message could not be accepted.'
+  return out
+}
+
 export function Contact() {
+  const { bundle, settings, preview } = useContent()
+  const profile = bundle.profile
+  const view = useSection('contact')
+  const resume = resumeHref(bundle)
+  const github = safeHref(profile.links.github)
+  const linkedin = safeHref(profile.links.linkedin)
+  // Server-side form when an API is configured and the CMS enables it; mailto otherwise.
+  const useApi = !!API_URL && settings?.contact.enabled === true && preview !== 'active'
   const [values, setValues] = useState<Record<Field, string>>({ name: '', email: '', subject: '', message: '' })
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({})
   const [opened, setOpened] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [send, setSend] = useState<SendState>({ kind: 'idle' })
+  const [website, setWebsite] = useState('')
+  const mountedAt = useRef(performance.now())
+  const started = useRef(false)
+
+  const onFormFocus = () => {
+    if (started.current) return
+    started.current = true
+    track('CONTACT_FORM_START', { section: 'contact' })
+  }
 
   const set = (k: Field) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setValues((v) => ({ ...v, [k]: e.target.value }))
     if (errors[k]) setErrors((er) => ({ ...er, [k]: undefined }))
   }
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault()
-    const errs = validate(values)
+    if (send.kind === 'sending') return
+    let errs = validate(values)
+    if (useApi && !Object.keys(errs).length) {
+      errs = await schemaErrors({ ...values, website, elapsedMs: 0 }).catch(() => ({}))
+    }
     setErrors(errs)
     const first = Object.keys(errs)[0]
     if (first) {
       document.getElementById(first)?.focus()
+      return
+    }
+    if (useApi) {
+      setSend({ kind: 'sending' })
+      try {
+        const res = await fetch(`${API_URL}/api/public/contact`, {
+          method: 'POST',
+          credentials: 'omit',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            name: values.name.trim(),
+            email: values.email.trim(),
+            subject: values.subject.trim(),
+            message: values.message.trim(),
+            website,
+            elapsedMs: Math.min(86_400_000, Math.max(0, Math.round(performance.now() - mountedAt.current))),
+          }),
+        })
+        if (res.ok) {
+          setSend({ kind: 'sent' })
+          setValues({ name: '', email: '', subject: '', message: '' })
+          track('CONTACT_FORM_SUBMIT', { section: 'contact' })
+        } else if (res.status === 429) {
+          setSend({ kind: 'error', message: 'Too many messages, try again later.' })
+        } else if (res.status === 400) {
+          setSend({ kind: 'error', message: 'Some fields were not accepted. Please check them and try again.' })
+        } else {
+          setSend({ kind: 'error', message: `The message could not be sent. You can email ${profile.email} directly.` })
+        }
+      } catch {
+        setSend({ kind: 'error', message: `Network error — the message was not sent. You can email ${profile.email} directly.` })
+      }
       return
     }
     // No backend: hand the message to the visitor's own email app.
@@ -93,26 +167,34 @@ export function Contact() {
   }
 
   return (
-    <section id="contact" className="relative overflow-hidden px-5 pb-20 pt-32 sm:px-8 md:pt-44">
-      <div aria-hidden className="absolute -bottom-40 left-1/2 -z-10 h-[600px] w-[1100px] -translate-x-1/2 rounded-full bg-violet/15 blur-[160px]" />
+    <section
+      id="contact"
+      className="sec-y relative overflow-hidden px-5 sm:px-8"
+      {...sectionAttrs(view, { pt: '8rem', pb: '5rem', ptMd: '11rem', pbMd: '5rem' })}
+    >
+      <div aria-hidden data-deco className="absolute -bottom-40 left-1/2 -z-10 h-[600px] w-[1100px] -translate-x-1/2 rounded-full bg-violet/15 blur-[160px]" />
+      <SectionBackdrop view={view} />
       <div className="mx-auto max-w-7xl">
-        <SectionLabel index="07">Contact</SectionLabel>
+        <SectionLabel index={view.index}>{view.eyebrow || 'Contact'}</SectionLabel>
         <SplitHeading
-          text="Have an interesting problem to solve?"
-          className="mt-8 max-w-5xl font-display text-[clamp(2.8rem,7.5vw,7rem)] font-semibold leading-[0.95] tracking-[-0.045em]"
+          text={view.heading || 'Have an interesting problem to solve?'}
+          className={`mt-8 max-w-5xl font-display ${headingSize.contact} font-semibold leading-[0.95] tracking-[-0.045em]`}
         />
 
         <div className="mt-16 grid gap-16 lg:grid-cols-12">
           <div className="lg:col-span-5">
             <p className="text-lg leading-relaxed text-mute">
-              I'm always interested in building meaningful products, exploring new technologies, and connecting with people who enjoy solving challenging problems.
+              {view.description ||
+                "I'm always interested in building meaningful products, exploring new technologies, and connecting with people who enjoy solving challenging problems."}
             </p>
 
             <div className="mt-10">
               <Magnetic strength={0.25}>
                 <a
                   href={`mailto:${profile.email}`}
-                  className="group relative inline-flex items-center gap-5 overflow-hidden rounded-full bg-fg py-3 pl-7 pr-3 text-ink"
+                  data-ev="CTA_CLICK"
+                  data-ev-target="contact-say-hello"
+                  className="btn-shape group relative inline-flex items-center gap-5 overflow-hidden rounded-full bg-fg py-3 pl-7 pr-3 text-ink"
                 >
                   <span className="absolute inset-0 origin-left scale-x-0 bg-gradient-to-r from-violet to-cyan transition-transform duration-700 ease-out-expo group-hover:scale-x-100" />
                   <span className="relative text-sm font-medium transition-colors duration-500 group-hover:text-white sm:text-base">Say hello</span>
@@ -126,7 +208,7 @@ export function Contact() {
 
             <div className="mt-8 flex items-center gap-3 font-mono text-sm">
               <Mail className="h-4 w-4 text-mute" />
-              <a href={`mailto:${profile.email}`} className="break-all text-fg/90 hover:text-cyan">
+              <a href={`mailto:${profile.email}`} data-ev="CTA_CLICK" data-ev-target="contact-email" className="break-all text-fg/90 hover:text-cyan">
                 {profile.email}
               </a>
               <button type="button" onClick={copy} aria-label="Copy email address" className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-line hover:border-line-2">
@@ -139,16 +221,20 @@ export function Contact() {
 
             <ul className="mt-10 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-line bg-line">
               {[
-                { label: 'GitHub', href: profile.links.github, icon: <GitHubIcon className="h-5 w-5" /> },
-                { label: 'LinkedIn', href: profile.links.linkedin, icon: <LinkedInIcon className="h-5 w-5" /> },
-                { label: 'Resume', href: profile.resumeUrl, icon: <FileDown className="h-5 w-5" />, download: true },
-              ].map((l) => (
+                { label: 'GitHub', href: github, icon: <GitHubIcon className="h-5 w-5" />, ev: 'GITHUB_CLICK' },
+                { label: 'LinkedIn', href: linkedin, icon: <LinkedInIcon className="h-5 w-5" />, ev: 'LINKEDIN_CLICK' },
+                { label: 'Resume', href: resume, icon: <FileDown className="h-5 w-5" />, download: true, ev: 'RESUME_DOWNLOAD' },
+              ]
+                .filter((l) => l.href)
+                .map((l) => (
                 <li key={l.label}>
                   <a
                     href={l.href}
                     target={l.download ? undefined : '_blank'}
                     rel="noopener"
                     download={l.download || undefined}
+                    data-ev={l.ev}
+                    data-ev-target="contact"
                     className="group flex h-full flex-col justify-between gap-8 bg-ink p-4 transition-colors hover:bg-ink-2"
                   >
                     <span className="text-mute transition-colors group-hover:text-fg">{l.icon}</span>
@@ -162,7 +248,20 @@ export function Contact() {
             </ul>
           </div>
 
-          <form onSubmit={submit} noValidate className="rounded-[28px] border border-line bg-ink-2/60 p-6 backdrop-blur sm:p-10 lg:col-span-6 lg:col-start-7" aria-describedby="form-note">
+          <form
+            onSubmit={submit}
+            onFocus={onFormFocus}
+            noValidate
+            className="relative rounded-[28px] border border-line bg-ink-2/60 p-6 backdrop-blur sm:p-10 lg:col-span-6 lg:col-start-7"
+            aria-describedby="form-note"
+          >
+            {useApi && (
+              // Honeypot: invisible to people and assistive tech; bots fill it in.
+              <div aria-hidden="true" className="absolute -left-[9999px] top-0 h-px w-px overflow-hidden">
+                <label htmlFor="website">Website</label>
+                <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
+              </div>
+            )}
             <div className="grid gap-8 sm:grid-cols-2">
               <Input id="name" label="Name" autoComplete="name" value={values.name} onChange={set('name')} error={errors.name} />
               <Input id="email" label="Email" type="email" autoComplete="email" value={values.email} onChange={set('email')} error={errors.email} />
@@ -175,14 +274,30 @@ export function Contact() {
             </div>
             <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
               <p id="form-note" className="max-w-xs text-xs leading-relaxed text-dim">
-                This site has no mail server. Sending opens your email app with the message ready — nothing is sent until you press send there.
+                {useApi
+                  ? 'Your message goes straight to my inbox. Your email is used only to reply.'
+                  : 'This site has no mail server. Sending opens your email app with the message ready — nothing is sent until you press send there.'}
               </p>
-              <button type="submit" className="group inline-flex items-center gap-2 rounded-full bg-fg px-6 py-3 text-sm font-medium text-ink transition-colors hover:bg-white">
-                Open in email app
+              <button
+                type="submit"
+                disabled={send.kind === 'sending'}
+                className="btn-shape group inline-flex items-center gap-2 rounded-full bg-fg px-6 py-3 text-sm font-medium text-ink transition-colors hover:bg-white disabled:opacity-60"
+              >
+                {useApi ? (send.kind === 'sending' ? 'Sending…' : 'Send message') : 'Open in email app'}
                 <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </button>
             </div>
-            {opened && (
+            {useApi && send.kind === 'sent' && (
+              <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ ease: EASE }} className="mt-6 text-sm text-emerald-300" role="status">
+                Thanks — your message has been sent. I'll get back to you soon.
+              </motion.p>
+            )}
+            {useApi && send.kind === 'error' && (
+              <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ ease: EASE }} className="mt-6 text-sm text-rose-300" role="alert">
+                {send.message}
+              </motion.p>
+            )}
+            {!useApi && opened && (
               <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ ease: EASE }} className="mt-6 text-sm text-emerald-300" role="status">
                 Your email app should now be open with the message. If nothing happened, write to {profile.email} directly.
               </motion.p>

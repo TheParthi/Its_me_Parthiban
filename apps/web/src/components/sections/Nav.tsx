@@ -1,6 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import { navItems, profile } from '../../data/profile'
+import { useContent } from '../../content/context'
+import { resumeHref } from '../../content/format'
+import { useNavItems } from '../../content/sections'
 import { EASE } from '../../lib/motion'
 import { lockScroll, scrollToId } from '../../lib/scroll'
 import { Monogram } from '../ui/Icons'
@@ -8,26 +10,36 @@ import { Monogram } from '../ui/Icons'
 // Sections that are not in the nav highlight their closest nav item.
 const SECTION_TO_NAV: Record<string, string> = { lab: 'projects', exploring: 'experience' }
 
-function useActiveSection() {
+function useActiveSection(navIds: string[]) {
   const [active, setActive] = useState<string>('home')
+  const key = navIds.join(',')
   useEffect(() => {
+    const ids = new Set(key.split(','))
     const on = () => {
       const mark = window.innerHeight * 0.45
       let current = 'home'
+      // Sections not in the nav highlight their mapped item, or else the
+      // nearest nav section above them.
       document.querySelectorAll<HTMLElement>('main > section[id]').forEach((el) => {
-        if (el.getBoundingClientRect().top <= mark) current = el.id
+        if (el.getBoundingClientRect().top > mark) return
+        const mapped = ids.has(el.id) ? el.id : SECTION_TO_NAV[el.id]
+        if (mapped && ids.has(mapped)) current = mapped
       })
-      setActive(SECTION_TO_NAV[current] ?? current)
+      setActive(current)
     }
     on()
     window.addEventListener('scroll', on, { passive: true })
     return () => window.removeEventListener('scroll', on)
-  }, [])
+  }, [key])
   return active
 }
 
 export function Nav() {
-  const active = useActiveSection()
+  const { bundle } = useContent()
+  const profile = bundle.profile
+  const resume = resumeHref(bundle)
+  const navItems = useNavItems()
+  const active = useActiveSection(navItems.map((n) => n.id))
   const [compact, setCompact] = useState(false)
   const [open, setOpen] = useState(false)
 
@@ -60,8 +72,9 @@ export function Nav() {
       >
         Skip to content
       </a>
-      <header className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-4">
+      <header data-nav-header className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-4">
         <motion.nav
+          data-nav-bar
           aria-label="Primary"
           initial={{ y: -40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -79,7 +92,7 @@ export function Nav() {
                 compact ? 'hidden' : 'hidden sm:inline'
               }`}
             >
-              {profile.name.toLowerCase()}
+              {profile.fullName.toLowerCase()}
             </span>
           </a>
 
@@ -111,10 +124,12 @@ export function Nav() {
 
           <div className="flex items-center gap-2">
             <a
-              href={profile.resumeUrl}
+              href={resume}
               target="_blank"
               rel="noopener"
-              className="hidden rounded-full bg-fg px-4 py-2 text-[13px] font-medium text-ink transition-colors hover:bg-white sm:inline-block"
+              data-ev="RESUME_DOWNLOAD"
+              data-ev-target="nav"
+              className="btn-shape hidden rounded-full bg-fg px-4 py-2 text-[13px] font-medium text-ink transition-colors hover:bg-white sm:inline-block"
             >
               Resume
             </a>
@@ -179,8 +194,8 @@ export function Nav() {
               animate={{ opacity: 1, transition: { delay: 0.5 } }}
               exit={{ opacity: 0 }}
             >
-              <span>{profile.location}</span>
-              <a href={profile.resumeUrl} target="_blank" rel="noopener" className="text-fg underline underline-offset-4">
+              <span>{profile.showLocation ? profile.location : ''}</span>
+              <a href={resume} target="_blank" rel="noopener" data-ev="RESUME_DOWNLOAD" data-ev-target="menu" className="text-fg underline underline-offset-4">
                 Resume ↗
               </a>
             </motion.div>

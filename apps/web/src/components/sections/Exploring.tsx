@@ -1,14 +1,23 @@
 import { motion } from 'framer-motion'
-import { exploring } from '../../data/profile'
-import { EASE } from '../../lib/motion'
+import { useContent } from '../../content/context'
+import { SectionBackdrop, sectionAttrs, useSection } from '../../content/sections'
 import { SectionLabel } from '../ui/Reveal'
+import { EASE } from '../../lib/motion'
 
 export function Exploring() {
+  const { bundle } = useContent()
+  const view = useSection('exploring')
+  const exploring = bundle.profile.exploring
   const loop = [...exploring, ...exploring]
   return (
-    <section id="exploring" className="relative overflow-hidden border-y border-line py-24 md:py-32">
+    <section
+      id="exploring"
+      className="sec-y relative overflow-hidden border-y border-line"
+      {...sectionAttrs(view, { pt: '6rem', pb: '6rem', ptMd: '8rem', pbMd: '8rem' })}
+    >
+      <SectionBackdrop view={view} />
       {/* Marquee of topics */}
-      <div className="relative flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_10%,#000_90%,transparent)]" aria-hidden>
+      {exploring.length > 0 && <div className="relative flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_10%,#000_90%,transparent)]" aria-hidden>
         <div className="marquee flex shrink-0 gap-12 whitespace-nowrap pr-12 font-display text-[clamp(2.5rem,6vw,5rem)] font-semibold tracking-[-0.03em]">
           {loop.map((e, i) => (
             <span key={i} className={i % 2 ? 'text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,.25)]' : 'text-fg/90'}>
@@ -17,22 +26,24 @@ export function Exploring() {
             </span>
           ))}
         </div>
-      </div>
+      </div>}
 
       <div className="mx-auto mt-20 max-w-7xl px-5 sm:px-8">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <SectionLabel index="06">Now</SectionLabel>
-            <h2 className="mt-6 font-display text-4xl font-semibold tracking-tight md:text-5xl">Currently Exploring.</h2>
+            <SectionLabel index={view.index}>{view.eyebrow || 'Now'}</SectionLabel>
+            <h2 className="mt-6 font-display text-4xl font-semibold tracking-tight md:text-5xl">{view.heading || 'Currently Exploring.'}</h2>
           </div>
-          <p className="max-w-sm text-sm text-mute">What I'm studying and building towards next. Ongoing — no made-up completion bars.</p>
+          <p className="max-w-sm text-sm text-mute">
+            {view.description || "What I'm studying and building towards next. Ongoing — no made-up completion bars."}
+          </p>
         </div>
 
         {/* A horizontal "learning track": each topic is a station on the line. */}
         <ol className="relative mt-14 grid gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
           {exploring.map((e, i) => (
             <motion.li
-              key={e.topic}
+              key={e.topic + i}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-10% 0px' }}

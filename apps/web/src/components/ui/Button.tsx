@@ -11,7 +11,7 @@ interface Props extends AnchorHTMLAttributes<HTMLAnchorElement> {
 }
 
 const base =
-  'group relative inline-flex items-center gap-3 overflow-hidden rounded-full px-6 py-3.5 text-sm font-medium transition-colors duration-300'
+  'btn-shape group relative inline-flex items-center gap-3 overflow-hidden rounded-full px-6 py-3.5 text-sm font-medium transition-colors duration-300'
 const variants: Record<Variant, string> = {
   primary: 'bg-fg text-ink hover:bg-white',
   ghost: 'border border-line-2 text-fg hover:border-fg/60',

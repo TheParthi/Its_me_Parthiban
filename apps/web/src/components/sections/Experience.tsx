@@ -1,25 +1,47 @@
-import { useEffect, useRef } from 'react'
-import { milestones, type MilestoneKind } from '../../data/experience'
+import { ArrowUpRight } from 'lucide-react'
+import { useEffect, useMemo, useRef } from 'react'
+import { useContent } from '../../content/context'
+import { headingSize, PAD_DEFAULT, SectionBackdrop, sectionAttrs, useSection } from '../../content/sections'
+import { buildTimeline, type Milestone } from '../../content/timeline'
+import { isReducedMotion, useReducedMotion } from '../../lib/motion'
 import { gsap } from '../../lib/scroll'
 import { Reveal, SectionLabel, SplitHeading } from '../ui/Reveal'
 
-const KIND_STYLE: Record<MilestoneKind, string> = {
+// Legend order; kinds not present in the timeline are not listed.
+const KIND_STYLE: Record<string, string> = {
   Internship: 'border-cyan/40 text-cyan',
   Winner: 'border-amber-300/40 text-amber-200',
   Selected: 'border-violet/50 text-violet-200',
   Participated: 'border-line-2 text-mute',
   Certified: 'border-emerald-400/40 text-emerald-300',
   Research: 'border-pink-400/40 text-pink-300',
+  Award: 'border-amber-300/40 text-amber-200',
+  Other: 'border-line-2 text-mute',
 }
+const ROLE_STYLE = 'border-cyan/40 text-cyan'
+export const kindStyle = (m: Pick<Milestone, 'kind' | 'group'>) => KIND_STYLE[m.kind] ?? (m.group === 'role' ? ROLE_STYLE : 'border-line-2 text-mute')
 
 export function Experience() {
+  const { bundle } = useContent()
+  const view = useSection('experience')
   const track = useRef<HTMLDivElement>(null)
   const line = useRef<HTMLDivElement>(null)
-  const items = milestones.filter((m) => !m.hidden)
+  const reduced = useReducedMotion()
+  const items = useMemo(() => buildTimeline(bundle), [bundle])
+  const kinds = useMemo(() => {
+    const present = new Map<string, Milestone>()
+    items.forEach((m) => present.has(m.kind) || present.set(m.kind, m))
+    const order = Object.keys(KIND_STYLE)
+    return [...present.values()].sort((a, b) => {
+      const ia = order.indexOf(a.kind)
+      const ib = order.indexOf(b.kind)
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib)
+    })
+  }, [items])
 
   // The timeline path draws itself as you scroll through the section.
   useEffect(() => {
-    if (!track.current || !line.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (!track.current || !line.current || reduced || isReducedMotion()) return
     const ctx = gsap.context(() => {
       gsap.fromTo(
         line.current,
@@ -35,26 +57,28 @@ export function Experience() {
       })
     })
     return () => ctx.revert()
-  }, [])
+  }, [reduced, items])
 
   return (
-    <section id="experience" className="relative px-5 py-32 sm:px-8 md:py-44">
+    <section id="experience" className="sec-y relative px-5 sm:px-8" {...sectionAttrs(view, PAD_DEFAULT)}>
+      <SectionBackdrop view={view} />
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-10 lg:grid-cols-12">
           <div className="lg:col-span-5 lg:sticky lg:top-32 lg:self-start">
-            <SectionLabel index="05">Experience</SectionLabel>
+            <SectionLabel index={view.index}>{view.eyebrow || 'Experience'}</SectionLabel>
             <SplitHeading
-              text="Milestones, so far."
-              className="mt-8 font-display text-[clamp(2.8rem,6.5vw,5.5rem)] font-semibold leading-[0.92] tracking-[-0.04em]"
+              text={view.heading || 'Milestones, so far.'}
+              className={`mt-8 font-display ${headingSize.md} font-semibold leading-[0.92] tracking-[-0.04em]`}
             />
             <Reveal delay={0.1}>
               <p className="mt-8 max-w-sm text-[15px] leading-relaxed text-mute">
-                Internships, hackathons, research and certifications. Each is labelled for what it was — a win, a selection, or taking part.
+                {view.description ||
+                  'Internships, hackathons, research and certifications. Each is labelled for what it was — a win, a selection, or taking part.'}
               </p>
               <ul className="mt-8 flex max-w-sm flex-wrap gap-2">
-                {(Object.keys(KIND_STYLE) as MilestoneKind[]).map((k) => (
-                  <li key={k} className={`rounded-full border px-2.5 py-1 font-mono text-[10px] ${KIND_STYLE[k]}`}>
-                    {k}
+                {kinds.map((m) => (
+                  <li key={m.kind} className={`rounded-full border px-2.5 py-1 font-mono text-[10px] ${kindStyle(m)}`}>
+                    {m.kind}
                   </li>
                 ))}
               </ul>
@@ -66,20 +90,20 @@ export function Experience() {
             <div ref={line} className="absolute bottom-2 left-[7px] top-2 w-px origin-top bg-gradient-to-b from-cyan via-violet to-violet/0" aria-hidden />
             <ol className="space-y-4">
               {items.map((m, i) => (
-                <li key={m.title} data-milestone className="relative pl-10">
+                <li key={m.id} data-milestone className="relative pl-10">
                   <span data-dot className="absolute left-0 top-7 h-[15px] w-[15px] rounded-full border-2 border-ink bg-ink-3 ring-1 ring-line-2" aria-hidden />
                   <Reveal delay={Math.min(i * 0.03, 0.15)}>
                     <div className="group rounded-2xl border border-transparent p-5 transition-colors duration-500 hover:border-line hover:bg-ink-2/60">
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                        <span className={`rounded-full border px-2 py-0.5 font-mono text-[10px] tracking-wide ${KIND_STYLE[m.kind]}`}>{m.kind}</span>
+                        <span className={`rounded-full border px-2 py-0.5 font-mono text-[10px] tracking-wide ${kindStyle(m)}`}>{m.kind}</span>
                         {m.date && <span className="font-mono text-[11px] text-dim">{m.date}</span>}
                       </div>
                       <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight">
                         {m.title}
-                        <span className="text-mute"> · {m.org}</span>
+                        {m.org && <span className="text-mute"> · {m.org}</span>}
                       </h3>
-                      <p className="mt-2 text-sm leading-relaxed text-mute">{m.detail}</p>
-                      {m.points && (
+                      {m.detail && <p className="mt-2 text-sm leading-relaxed text-mute">{m.detail}</p>}
+                      {m.points.length > 0 && (
                         <ul className="mt-4 space-y-2">
                           {m.points.map((p) => (
                             <li key={p} className="relative pl-4 text-sm leading-relaxed text-fg/80 before:absolute before:left-0 before:top-[0.6em] before:h-px before:w-2 before:bg-cyan">
@@ -88,8 +112,18 @@ export function Experience() {
                           ))}
                         </ul>
                       )}
-                      {m.meta && (
+                      {m.meta.length > 0 && (
                         <div className="mt-4 font-mono text-[11px] text-dim">{m.meta.join('  /  ')}</div>
+                      )}
+                      {m.link && (
+                        <a
+                          href={m.link.href}
+                          target="_blank"
+                          rel="noopener"
+                          className="mt-4 inline-flex items-center gap-1 font-mono text-[11px] text-mute hover:text-cyan"
+                        >
+                          {m.link.label} <ArrowUpRight className="h-3 w-3" />
+                        </a>
                       )}
                     </div>
                   </Reveal>

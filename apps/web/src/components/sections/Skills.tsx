@@ -1,30 +1,29 @@
 import { AnimatePresence, motion } from 'framer-motion'
+import type { PublicSkill } from '@pg/shared'
 import { useMemo, useState } from 'react'
-import { skillCategories, skills, type Skill, type SkillCategory } from '../../data/skills'
+import { useContent } from '../../content/context'
+import { headingSize, PAD_DEFAULT, SectionBackdrop, sectionAttrs, useSection } from '../../content/sections'
 import { EASE } from '../../lib/motion'
 import { Reveal, SectionLabel, SplitHeading } from '../ui/Reveal'
 
 // Technology constellation: each category is a cluster placed on an ellipse;
-// its skills orbit the cluster centre. Links come from the data file.
+// its skills orbit the cluster centre. Cross links come from each skill's
+// `related` list in the CMS.
 
 const W = 1000
 const H = 620
-const CAT_COLOR: Record<SkillCategory, string> = {
-  Programming: '#8B5CF6',
-  Frontend: '#00E5FF',
-  Backend: '#34D399',
-  Databases: '#FFD166',
-  Mobile: '#FF9F43',
-  'Tools & Platforms': '#F472B6',
-}
+const HEX = /^#[0-9a-f]{6}$/i
 
-interface Placed extends Skill {
+interface Placed extends PublicSkill {
   x: number
   y: number
 }
 
-function layout(): { nodes: Placed[]; centers: Record<SkillCategory, { x: number; y: number }> } {
-  const centers = {} as Record<SkillCategory, { x: number; y: number }>
+function layout(
+  skillCategories: string[],
+  skills: PublicSkill[],
+): { nodes: Placed[]; centers: Record<string, { x: number; y: number }> } {
+  const centers: Record<string, { x: number; y: number }> = {}
   skillCategories.forEach((c, i) => {
     const a = (i / skillCategories.length) * Math.PI * 2 - Math.PI / 2
     centers[c] = { x: W / 2 + Math.cos(a) * 320, y: H / 2 + Math.sin(a) * 195 }
@@ -42,14 +41,31 @@ function layout(): { nodes: Placed[]; centers: Record<SkillCategory, { x: number
 }
 
 export function Skills() {
-  const { nodes, centers } = useMemo(layout, [])
-  const [filter, setFilter] = useState<SkillCategory | 'All'>('All')
+  const { bundle } = useContent()
+  const view = useSection('skills')
+  const skills = bundle.skills
+  // Categories in CMS order, plus any a skill references that the list lacks.
+  const { skillCategories, CAT_COLOR } = useMemo(() => {
+    const names: string[] = []
+    const colors: Record<string, string> = {}
+    bundle.skillCategories.forEach((c) => {
+      if (!names.includes(c.name)) names.push(c.name)
+      colors[c.name] = HEX.test(c.color) ? c.color : '#8B5CF6'
+    })
+    skills.forEach((s) => {
+      if (!names.includes(s.category)) names.push(s.category)
+      colors[s.category] ??= HEX.test(s.categoryColor) ? s.categoryColor : '#8B5CF6'
+    })
+    return { skillCategories: names.filter((n) => skills.some((s) => s.category === n)), CAT_COLOR: colors }
+  }, [bundle.skillCategories, skills])
+  const { nodes, centers } = useMemo(() => layout(skillCategories, skills), [skillCategories, skills])
+  const [filter, setFilter] = useState<string>('All')
   const [hover, setHover] = useState<string | null>(null)
   const byName = useMemo(() => Object.fromEntries(nodes.map((n) => [n.name, n])), [nodes])
 
   const links = useMemo(() => {
     const out: [Placed, Placed][] = []
-    nodes.forEach((n) => n.links?.forEach((l) => byName[l] && out.push([n, byName[l]])))
+    nodes.forEach((n) => n.related.forEach((l) => byName[l] && byName[l] !== n && out.push([n, byName[l]])))
     return out
   }, [nodes, byName])
 
@@ -63,23 +79,24 @@ export function Skills() {
     return s
   }, [hover, links])
 
-  const visible = (n: Skill) => filter === 'All' || n.category === filter
+  const visible = (n: PublicSkill) => filter === 'All' || n.category === filter
   const hovered = hover ? byName[hover] : null
 
   return (
-    <section id="skills" className="relative px-5 py-32 sm:px-8 md:py-44">
+    <section id="skills" className="sec-y relative px-5 sm:px-8" {...sectionAttrs(view, PAD_DEFAULT)}>
+      <SectionBackdrop view={view} />
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-10 lg:grid-cols-12">
           <div className="lg:col-span-7">
-            <SectionLabel index="04">Skills</SectionLabel>
+            <SectionLabel index={view.index}>{view.eyebrow || 'Skills'}</SectionLabel>
             <SplitHeading
-              text="A constellation of tools."
-              className="mt-8 font-display text-[clamp(2.8rem,7.5vw,6.5rem)] font-semibold leading-[0.92] tracking-[-0.04em]"
+              text={view.heading || 'A constellation of tools.'}
+              className={`mt-8 font-display ${headingSize.lg} font-semibold leading-[0.92] tracking-[-0.04em]`}
             />
           </div>
           <Reveal className="self-end lg:col-span-4 lg:col-start-9">
             <p className="text-[15px] leading-relaxed text-mute">
-              Technologies I have actually used, and where I used them. No made-up percentages.
+              {view.description || 'Technologies I have actually used, and where I used them. No made-up percentages.'}
             </p>
           </Reveal>
         </div>
@@ -87,7 +104,7 @@ export function Skills() {
         {/* Category filter */}
         <Reveal>
           <div role="group" aria-label="Filter skills by category" className="mt-14 flex flex-wrap gap-2">
-            {(['All', ...skillCategories] as const).map((c) => {
+            {['All', ...skillCategories].map((c) => {
               const on = filter === c
               return (
                 <button
@@ -127,7 +144,7 @@ export function Skills() {
                   const show = visible(n)
                   return (
                     <line
-                      key={'s' + n.name}
+                      key={'s' + n.id}
                       x1={c.x}
                       y1={c.y}
                       x2={n.x}
@@ -146,7 +163,7 @@ export function Skills() {
                   const my = (a.y + b.y) / 2 - 40
                   return (
                     <path
-                      key={a.name + b.name}
+                      key={a.id + '-' + b.id}
                       d={`M${a.x} ${a.y} Q${mx} ${my} ${b.x} ${b.y}`}
                       fill="none"
                       stroke={on ? '#fff' : 'rgba(255,255,255,.14)'}
@@ -174,7 +191,7 @@ export function Skills() {
                 const faded = !show || (related !== null && !related.has(n.name))
                 return (
                   <motion.button
-                    key={n.name}
+                    key={n.id}
                     type="button"
                     onPointerEnter={() => setHover(n.name)}
                     onPointerLeave={() => setHover(null)}
@@ -239,7 +256,7 @@ export function Skills() {
                   {skills
                     .filter((s) => s.category === c)
                     .map((s) => (
-                      <li key={s.name} className="bg-ink-2 px-4 py-3">
+                      <li key={s.id} className="bg-ink-2 px-4 py-3">
                         <div className="text-sm font-medium">{s.name}</div>
                         <div className="mt-0.5 text-xs text-mute">{s.note}</div>
                       </li>

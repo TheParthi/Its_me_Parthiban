@@ -1,0 +1,158 @@
+@import 'tailwindcss';
+
+/*
+ * Portfolio Control Center — design tokens.
+ * Shares the public site's type (Space Grotesk / Inter / JetBrains Mono) and
+ * violet/cyan accents, tuned for a dense, calm dashboard.
+ */
+@theme {
+  --color-bg: #090b10;
+  --color-sidebar: #10131b;
+  --color-card: #151923;
+  --color-card-2: #1a1f2b;
+  --color-raised: #1f2533;
+  --color-accent: #8b5cf6;
+  --color-accent-strong: #7c4df0;
+  --color-accent-2: #00d5ff;
+  --color-fg: #f5f7fa;
+  --color-muted: #9299a8;
+  --color-dim: #626a7b;
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-2: rgba(255, 255, 255, 0.14);
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger: #fb7185;
+  --color-info: #22d3ee;
+
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  background: var(--color-bg);
+  scrollbar-color: #2a2f3c var(--color-bg);
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: rgba(139, 92, 246, 0.45);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent-2);
+  outline-offset: 2px;
+}
+
+/* Inputs draw their own ring. */
+.field-control:focus-visible {
+  outline: none;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.mono-meta {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--color-muted);
+}
+
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #2a2f3c transparent;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Markdown preview */
+.prose-admin {
+  color: #d7dbe3;
+  line-height: 1.7;
+}
+.prose-admin h1, .prose-admin h2, .prose-admin h3 {
+  color: var(--color-fg);
+  margin: 1.2em 0 0.5em;
+  font-weight: 600;
+}
+.prose-admin h1 { font-size: 1.5rem; }
+.prose-admin h2 { font-size: 1.25rem; }
+.prose-admin h3 { font-size: 1.05rem; }
+.prose-admin p { margin: 0.6em 0; }
+.prose-admin a { color: var(--color-accent-2); text-decoration: underline; text-underline-offset: 3px; }
+.prose-admin ul { list-style: disc; padding-left: 1.4em; margin: 0.6em 0; }
+.prose-admin ol { list-style: decimal; padding-left: 1.4em; margin: 0.6em 0; }
+.prose-admin code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+.prose-admin pre {
+  background: #0d1017;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  padding: 0.9em 1em;
+  overflow-x: auto;
+}
+.prose-admin pre code { background: none; border: 0; padding: 0; }
+.prose-admin blockquote {
+  border-left: 2px solid var(--color-accent);
+  padding-left: 1em;
+  color: var(--color-muted);
+}
+.prose-admin > :first-child { margin-top: 0; }
+
+/* Recharts: keep focus outlines off SVG wrappers (tooltips carry the data). */
+.recharts-wrapper:focus, .recharts-surface:focus { outline: none; }
+
+input[type='range'] {
+  accent-color: var(--color-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
