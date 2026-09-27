@@ -1,45 +1,59 @@
-# Parthiban Gunasekaran — Portfolio
+# Parthiban Gunasekaran — Portfolio Platform
 
-Live: https://theparthi.github.io/Its_me_Parthiban/
+Public portfolio + a CMS "Control Center" to manage it, sharing one backend.
 
-React + TypeScript + Vite, styled with Tailwind CSS v4. Motion by Framer Motion,
-GSAP ScrollTrigger and Lenis; the hero core is Three.js via React Three Fiber
-(lazy-loaded, with an SVG fallback on mobile and for reduced motion).
+| Path | What |
+|---|---|
+| `apps/web` | Public portfolio (React, Three.js). Reads published content from the API; falls back to the bundled content in `src/data` when no API is configured. Live: https://theparthi.github.io/Its_me_Parthiban/ |
+| `apps/admin` | Admin dashboard (React). Served by the API at `/admin` in production. |
+| `apps/api` | NestJS REST API: auth, RBAC, content with drafts/versions, media, analytics, contact, audit. Swagger at `/api/docs`. |
+| `packages/shared` | Zod schemas and types shared by all three — the single source of truth for validation. |
+| `docs/` | `API_CONTRACT.md`, `DEPLOYMENT.md` (AWS), `aws/` policy templates. |
 
-## Editing content
+## Local development
 
-All copy lives in `src/data/` — components never hard-code personal details.
-
-| File | What it holds |
-| --- | --- |
-| `profile.ts` | Name, links, hero roles, About copy, "Currently Exploring" |
-| `projects.ts` | Featured projects (showcase + detail modal) and the archive list |
-| `skills.ts` | Skill constellation: categories, notes and links between skills |
-| `experience.ts` | Timeline. `kind` labels Winner / Selected / Participated / Certified; `hidden: true` keeps an entry out until verified |
-
-The resume is `public/Parthiban_Gunasekaran_Resume.pdf` (keep the filename, or
-update `resumeUrl` in `profile.ts`).
-
-## Structure
-
-```
-src/
-  data/                 content (edit here)
-  components/sections/  page sections: Nav, Hero, About, Projects, Lab, Skills, Experience, Exploring, Contact, Footer
-  components/previews/  animated SVG project previews
-  components/lab/       Engineering Lab experiments
-  components/three/     WebGL hero core + fallback
-  components/ui/        Reveal, Magnetic, Button, icons, cursor/grain
-  lib/                  motion hooks, smooth scroll
-```
-
-## Commands
+Requirements: Node 22+, PostgreSQL 16 (local install; no Docker needed).
 
 ```bash
 npm install
-npm run dev        # local dev server
-npm run build      # typecheck + production build into dist/
-npm run deploy     # build and publish dist/ to the gh-pages branch
+createdb portfolio_dev && createdb portfolio_test
+cp apps/api/.env.example apps/api/.env      # fill in DATABASE_URL and generate the three secrets
+npm run build -w @pg/shared
+npm run db:migrate                           # apply migrations
+npm run db:seed                              # roles + imports the current portfolio content
+npm run admin:create                         # create your Super Admin (prompts for a password)
+
+npm run dev:api      # http://localhost:4000   (API, docs at /api/docs)
+npm run dev:admin    # http://localhost:5174/admin
+npm run dev:web      # http://localhost:5173   (set VITE_API_URL=http://localhost:4000 in apps/web/.env.local to use the API)
 ```
 
-GitHub Pages serves the `gh-pages` branch.
+Media is stored on local disk in development (`STORAGE_DRIVER=local`); switch to S3 with the
+environment variables in `apps/api/.env.example`.
+
+## Tests
+
+```bash
+npm test     # API end-to-end tests against the portfolio_test database
+```
+
+Covers authentication (lockout, refresh rotation and reuse detection, 2FA, password reset),
+authorisation for every role, project/profile publishing and visibility in the public API,
+versions, backup round-trip, media upload validation and usage checks, analytics collection and
+reports, and the contact form.
+
+## Security model (summary)
+
+- No public registration; the first Super Admin is created with `npm run admin:create`.
+- Argon2id password hashes; 15-minute access tokens held in memory; rotating refresh tokens in
+  `HttpOnly; Secure; SameSite=Strict` cookies, stored only as SHA-256 hashes, with reuse detection.
+- Progressive lockout, optional/enforceable TOTP 2FA (secrets AES-GCM encrypted), single-use
+  expiring reset and invite tokens, password re-confirmation for sensitive actions.
+- Permissions enforced by API guards on every route; the UI only mirrors them.
+- Append-only audit log (enforced by a database trigger); secrets are redacted from metadata.
+- Analytics: first-party, no IP addresses stored, bots and Do-Not-Track dropped, consent before a
+  persistent anonymous ID, configurable retention.
+
+## Deploying
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). The public site deploys with `npm run deploy:web`.

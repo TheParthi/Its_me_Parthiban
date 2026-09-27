@@ -55,7 +55,7 @@ export class ContactService {
     if (spam) return { ok: true } // same answer as a real submission
 
     const title = b.subject.length > 80 ? `${b.subject.slice(0, 79)}…` : b.subject
-    await this.notifications.create({ type: 'message', title: 'New contact message', body: title, link: `/messages/${msg.id}`, permission: 'messages:read' })
+    await this.notifications.create({ type: 'message', title: 'New contact message', body: title, link: `/messages?id=${msg.id}`, permission: 'messages:read' })
     const to = env().NOTIFY_EMAIL
     if (s.contact.notifyByEmail && to) {
       // Without SMTP the mailer logs the text, so the body is only included when it will really be emailed.

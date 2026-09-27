@@ -41,7 +41,7 @@ export class ContentScheduler {
             type: 'publish_failed',
             title: `Scheduled publish failed: ${p.title}`,
             body: reason,
-            link: `/admin/projects/${p.id}`,
+            link: `/projects/${p.id}`,
             permission: 'content:publish',
           })
         }

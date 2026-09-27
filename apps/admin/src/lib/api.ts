@@ -260,8 +260,18 @@ async function send(path: string, o: RequestOptions): Promise<Response> {
   }
 }
 
+const CREDENTIAL_CHECK = /^\/auth\/(reauth|change-password|2fa\/enable)$/
+/** Messages the API's auth guard uses when the access token itself is the problem. */
+const SESSION_401 = new Set(['Authentication required', 'Session expired', 'Session is no longer valid'])
+
 export async function apiRaw(path: string, o: RequestOptions = {}): Promise<Response> {
   let res = await send(path, o)
+  // On credential checks a 401 means "wrong password/code", not an expired
+  // session — refreshing and retrying would just submit the attempt twice.
+  if (res.status === 401 && CREDENTIAL_CHECK.test(path)) {
+    const body = (await res.clone().json().catch(() => null)) as { message?: string } | null
+    if (!SESSION_401.has(body?.message ?? '')) throw await parseError(res)
+  }
   if (res.status === 401 && !o.anonymous) {
     const ok = await refreshSession() // a network failure propagates; it is not a logout
     if (!ok) {

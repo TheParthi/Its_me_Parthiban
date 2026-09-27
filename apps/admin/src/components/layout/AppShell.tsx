@@ -175,14 +175,19 @@ export function AppShell() {
               <MenuIcon className="h-5 w-5" />
             </Button>
             <GlobalSearch />
-            <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+            <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
               <HealthPill />
-              <Button variant="secondary" size="sm" onClick={preview.open} loading={preview.pending} icon={<ExternalLink className="h-3.5 w-3.5" />} className="hidden md:inline-flex">
-                Preview website
-              </Button>
-              <Button variant="ghost" size="icon" onClick={preview.open} aria-label="Preview website" className="md:hidden">
-                <ExternalLink className="h-4 w-4" />
-              </Button>
+              {/* Wrappers carry the breakpoint: Button's own display class would override `hidden`. */}
+              <span className="hidden md:block">
+                <Button variant="secondary" size="sm" onClick={preview.open} loading={preview.pending} icon={<ExternalLink className="h-3.5 w-3.5" />}>
+                  Preview website
+                </Button>
+              </span>
+              <span className="md:hidden">
+                <Button variant="ghost" size="icon" onClick={preview.open} aria-label="Preview website">
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              </span>
               <QuickCreate />
               <NotificationsBell />
               <UserMenu />

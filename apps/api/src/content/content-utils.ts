@@ -80,8 +80,9 @@ export interface ContentRow {
   updatedAt: Date
 }
 
-export const hasUnpublishedChanges = (r: Pick<ContentRow, 'published' | 'publishedAt' | 'draftUpdatedAt'>) =>
-  r.published == null || !r.publishedAt || r.draftUpdatedAt > r.publishedAt
+/** Compares content, not timestamps, so reverted edits don't count as pending. */
+export const hasUnpublishedChanges = (r: Pick<ContentRow, 'draft' | 'published' | 'publishedAt'>) =>
+  r.published == null || !r.publishedAt || JSON.stringify(r.draft) !== JSON.stringify(r.published)
 
 export function rowMeta(r: ContentRow) {
   return {

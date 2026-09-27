@@ -137,7 +137,7 @@ export function GlobalSearch() {
   const listId = 'global-search-results'
 
   return (
-    <div ref={box} className="relative w-full max-w-md">
+    <div ref={box} className="relative min-w-0 max-w-md flex-1">
       <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-dim" aria-hidden />
       <input
         ref={input}
