@@ -1,0 +1,22 @@
+import{r as e}from"./rolldown-runtime-hePW80VL.js";import{a as t,t as n}from"./react-CabsC5_0.js";import{a as r,i,n as a,o,r as s,t as c}from"./three-hPh5lBNH.js";var l=e(t(),1),u=n(),d=`
+  varying vec3 vNormal;
+  varying vec3 vView;
+  void main() {
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    vNormal = normalize(normalMatrix * normal);
+    vView = normalize(-mv.xyz);
+    gl_Position = projectionMatrix * mv;
+  }
+`,f=`
+  uniform float uTime;
+  uniform vec3 uA;
+  uniform vec3 uB;
+  varying vec3 vNormal;
+  varying vec3 vView;
+  void main() {
+    float f = pow(1.0 - abs(dot(vNormal, vView)), 2.6);
+    float band = 0.5 + 0.5 * sin(vNormal.y * 14.0 + uTime * 1.4);
+    vec3 col = mix(uA, uB, band);
+    gl_FragColor = vec4(col, f * 0.85);
+  }
+`;function p(){let e=(0,l.useRef)(null),t=(0,l.useMemo)(()=>({uTime:{value:0},uA:{value:new i(`#8B5CF6`)},uB:{value:new i(`#00E5FF`)}}),[]);return s((t,n)=>{e.current&&(e.current.uniforms.uTime.value+=n)}),(0,u.jsxs)(`mesh`,{scale:1.55,children:[(0,u.jsx)(`icosahedronGeometry`,{args:[1,6]}),(0,u.jsx)(`shaderMaterial`,{ref:e,vertexShader:d,fragmentShader:f,uniforms:t,transparent:!0,depthWrite:!1,blending:2})]})}function m(){let e=(0,l.useRef)(null);return s((t,n)=>{e.current&&(e.current.rotation.x+=n*.25,e.current.rotation.y+=n*.35)}),(0,u.jsxs)(`mesh`,{ref:e,scale:.78,children:[(0,u.jsx)(`dodecahedronGeometry`,{args:[1,0]}),(0,u.jsx)(`meshStandardMaterial`,{color:`#3a3f58`,emissive:`#1b1040`,metalness:.65,roughness:.28,flatShading:!0})]})}function h(){let e=(0,l.useRef)(null),t=(0,l.useMemo)(()=>new r(new o(1.9,1)),[]);return s((t,n)=>{e.current&&(e.current.rotation.y-=n*.08,e.current.rotation.z+=n*.04)}),(0,u.jsx)(`lineSegments`,{ref:e,geometry:t,children:(0,u.jsx)(`lineBasicMaterial`,{color:`#8B5CF6`,transparent:!0,opacity:.28})})}function g({radius:e,tilt:t,speed:n,color:r,dots:i}){let a=(0,l.useRef)(null),o=(0,l.useMemo)(()=>{let t=new Float32Array(i*3);for(let n=0;n<i;n++){let r=n/i*Math.PI*2;t[n*3]=Math.cos(r)*e,t[n*3+2]=Math.sin(r)*e}return t},[e,i]);return s((e,t)=>{a.current&&(a.current.rotation.y+=t*n)}),(0,u.jsxs)(`group`,{rotation:t,children:[(0,u.jsxs)(`mesh`,{rotation:[Math.PI/2,0,0],children:[(0,u.jsx)(`torusGeometry`,{args:[e,.004,8,160]}),(0,u.jsx)(`meshBasicMaterial`,{color:r,transparent:!0,opacity:.35})]}),(0,u.jsxs)(`group`,{ref:a,children:[(0,u.jsxs)(`points`,{children:[(0,u.jsx)(`bufferGeometry`,{children:(0,u.jsx)(`bufferAttribute`,{attach:`attributes-position`,args:[o,3]})}),(0,u.jsx)(`pointsMaterial`,{color:r,size:.045,sizeAttenuation:!0,transparent:!0,opacity:.9})]}),(0,u.jsxs)(`mesh`,{position:[e,0,0],children:[(0,u.jsx)(`sphereGeometry`,{args:[.05,16,16]}),(0,u.jsx)(`meshBasicMaterial`,{color:`#ffffff`})]})]})]})}function _({count:e=900}){let t=(0,l.useRef)(null),n=(0,l.useMemo)(()=>{let t=new Float32Array(e*3);for(let n=0;n<e;n++){let e=2.6+Math.random()*3.2,r=Math.random()*Math.PI*2,i=Math.acos(2*Math.random()-1);t[n*3]=e*Math.sin(i)*Math.cos(r),t[n*3+1]=e*Math.sin(i)*Math.sin(r),t[n*3+2]=e*Math.cos(i)}return t},[e]);return s((e,n)=>{t.current&&(t.current.rotation.y+=n*.02)}),(0,u.jsxs)(`points`,{ref:t,children:[(0,u.jsx)(`bufferGeometry`,{children:(0,u.jsx)(`bufferAttribute`,{attach:`attributes-position`,args:[n,3]})}),(0,u.jsx)(`pointsMaterial`,{color:`#9aa0ff`,size:.018,sizeAttenuation:!0,transparent:!0,opacity:.55,depthWrite:!1})]})}function v({children:e}){let t=(0,l.useRef)(null);return s(({pointer:e},n)=>{if(!t.current)return;let r=1-.001**n;t.current.rotation.y+=(e.x*.5-t.current.rotation.y)*r,t.current.rotation.x+=(-e.y*.35-t.current.rotation.x)*r}),(0,u.jsx)(`group`,{ref:t,children:e})}function y(){return(0,u.jsxs)(a,{dpr:[1,1.75],camera:{position:[0,0,6.2],fov:42},gl:{antialias:!0,alpha:!0,powerPreference:`high-performance`},eventSource:document.body,eventPrefix:`client`,children:[(0,u.jsx)(`ambientLight`,{intensity:.25}),(0,u.jsx)(`pointLight`,{position:[4,3,4],intensity:60,color:`#00E5FF`}),(0,u.jsx)(`pointLight`,{position:[-4,-2,3],intensity:60,color:`#8B5CF6`}),(0,u.jsx)(`pointLight`,{position:[0,4,-4],intensity:30,color:`#ffffff`}),(0,u.jsxs)(v,{children:[(0,u.jsxs)(c,{speed:1.2,rotationIntensity:.25,floatIntensity:.6,children:[(0,u.jsx)(m,{}),(0,u.jsx)(p,{}),(0,u.jsx)(h,{}),(0,u.jsx)(g,{radius:2.35,tilt:[.35,0,.2],speed:.35,color:`#00E5FF`,dots:64}),(0,u.jsx)(g,{radius:2.7,tilt:[-.6,.3,-.1],speed:-.22,color:`#8B5CF6`,dots:90})]}),(0,u.jsx)(_,{})]})]})}export{y as default};
