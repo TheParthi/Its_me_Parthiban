@@ -16,6 +16,8 @@ import { MobilityPreview } from '../previews/MobilityPreview'
 import { SecurityPreview } from '../previews/SecurityPreview'
 import { VisionPreview } from '../previews/VisionPreview'
 import { Reveal, SectionLabel, SplitHeading } from '../ui/Reveal'
+import { showcaseFor } from '../../data/showcase'
+import { AppShowcase } from './AppShowcase'
 
 // The modal (with marked + DOMPurify) loads on demand; hovering a project
 // starts the download early.
@@ -296,16 +298,26 @@ export function Projects() {
           <Reveal className="self-end lg:col-span-4 lg:col-start-9">
             <p className="text-[15px] leading-relaxed text-mute">
               {view.description ||
-                'Four projects, from a ride-hailing platform in production to research on the edge. Hover or tap a preview for the stack; open one for the architecture and the hard parts.'}
+                'Five projects, from five apps live on Google Play and a full-stack web platform to research on the edge. Browse the real store screenshots, or open a project for the architecture and the hard parts.'}
             </p>
           </Reveal>
         </div>
 
         {featured.length > 0 && (
           <div className="mt-28 space-y-40 md:space-y-52">
-            {featured.map((p, i) => (
-              <ProjectRow key={p.id} project={p} index={String(i + 1).padStart(2, '0')} flip={i % 2 === 1} onOpen={() => open(p.slug)} />
-            ))}
+            {featured.map((p, i) => {
+              const showcase = showcaseFor(p.slug)
+              return (
+                <div key={p.id}>
+                  <ProjectRow project={p} index={String(i + 1).padStart(2, '0')} flip={i % 2 === 1} onOpen={() => open(p.slug)} />
+                  {showcase && (
+                    <div className="mt-16 md:mt-20">
+                      <AppShowcase showcase={showcase} />
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         )}
 

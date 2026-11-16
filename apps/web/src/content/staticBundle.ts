@@ -2,6 +2,7 @@ import type { PublicBundle, PublicProject } from '@pg/shared'
 import { milestones } from '../data/experience'
 import { about, exploring, profile } from '../data/profile'
 import { archiveProjects, featuredProjects } from '../data/projects'
+import { showcaseFor, workUrl } from '../data/showcase'
 import { skillCategories, skills } from '../data/skills'
 import { DEFAULT_APPEARANCE } from './defaults'
 
@@ -71,6 +72,14 @@ function buildProjects(): PublicProject[] {
     description: fp.description,
     accent: fp.accent,
     previewStyle: fp.preview,
+    cover: fp.cover
+      ? { id: `${fp.id}-cover`, url: `${import.meta.env.BASE_URL}${fp.cover.file}`, alt: fp.cover.alt, width: fp.cover.width, height: fp.cover.height }
+      : null,
+    // Showcase screenshots (real app screens first, then store graphics), so the detail modal shows them too.
+    screenshots: (showcaseFor(fp.id)?.apps ?? []).flatMap((app) => [
+      ...(app.ui ?? []).map((s) => ({ id: `${app.id}-ui-${s.file}`, url: workUrl(`${app.dir}/${app.kind === 'web' ? 'web' : 'ui'}`, s.file), alt: `${app.name} — ${s.caption}`, width: null, height: null })),
+      ...app.shots.map((s) => ({ id: `${app.id}-${s.file}`, url: workUrl(app.dir, s.file), alt: `${app.name} — ${s.caption}`, width: null, height: null })),
+    ]),
     links: fp.links,
     demoUrl: fp.links[0]?.href ?? '',
     technologies: fp.tech,
@@ -243,7 +252,7 @@ export function staticBundle(): PublicBundle {
       title: 'Parthiban Gunasekaran — Software Engineer',
       // Same copy as the static <meta> in index.html.
       description:
-        'Parthiban Gunasekaran — full-stack software engineer building intelligent applications, scalable real-time systems and products people use. Currently shipping NexaRide at Dendo.',
+        'Parthiban Gunasekaran — full-stack software engineer building intelligent applications, scalable real-time systems and products people use. Shipping NexaRide and Dendo at Dendo — five apps live on Google Play.',
       ogTitle: 'Parthiban Gunasekaran — Software Engineer',
       ogDescription: 'Engineering the future, one idea at a time. Projects, engineering lab and experience.',
       ogImage: null,

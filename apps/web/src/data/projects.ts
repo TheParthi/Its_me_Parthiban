@@ -1,7 +1,7 @@
 // Project content. Featured projects get a cinematic showcase and a detail
 // modal; archive projects render as a compact index. Add new entries here.
 
-export type PreviewKind = 'mobility' | 'delivery' | 'security' | 'vision'
+export type PreviewKind = 'mobility' | 'delivery' | 'security' | 'vision' | 'image'
 export type FeatureStatus = 'shipped' | 'in-progress' | 'proposed'
 
 export interface ProjectLink {
@@ -25,6 +25,8 @@ export interface FeaturedProject {
   challenges: { title: string; text: string }[]
   links: ProjectLink[]
   note?: string
+  /** Image under public/ used as the preview when `preview` is 'image'. */
+  cover?: { file: string; alt: string; width: number; height: number }
 }
 
 export interface ArchiveProject {
@@ -72,42 +74,86 @@ export const featuredProjects: FeaturedProject[] = [
       { label: 'Website', href: 'https://nexaride.in' },
       { label: 'Google Play', href: 'https://play.google.com/store/apps/details?id=com.nexaride.userapp' },
       { label: 'App Store', href: 'https://apps.apple.com/app/id6791447323' },
+      { label: 'Driver app', href: 'https://play.google.com/store/apps/details?id=com.nexadriver' },
     ],
-    note: 'Built at Dendo as part of the engineering team. Source is proprietary.',
+    note: 'Built at Dendo as part of the engineering team. Source is proprietary; screenshots are from the public store listings.',
   },
   {
     id: 'dendo',
     index: '02',
     title: 'Dendo',
-    category: 'Hyperlocal Food & Delivery · Product Development',
-    status: 'In development',
+    category: 'Hyperlocal Food & Parcel Delivery · Mobile + Backend',
+    status: 'Live on Google Play · 3 apps',
     description:
-      'A food delivery platform designed to simplify the ordering experience while connecting customers, restaurants, and delivery partners.',
-    preview: 'delivery',
-    accent: '#FF9F43',
-    tech: ['React Native', 'TypeScript', 'Express', 'Socket.IO', 'PostgreSQL', 'Redis', 'Google Maps', 'Cashfree'],
+      'A hyperlocal food and parcel delivery platform: a customer app, a rider app and a restaurant partner app, run from one admin panel.',
+    preview: 'image',
+    cover: { file: 'work/dendo/customer/cover.webp', alt: 'Dendo customer app — home screen with categories and restaurants', width: 1600, height: 1040 },
+    accent: '#3B6CF6',
+    tech: ['Flutter', 'Dart', 'GetX', 'Laravel 12', 'PHP 8.2', 'MySQL', 'Laravel Passport', 'Pusher', 'Firebase Cloud Messaging', 'Google Maps', 'Razorpay', 'AWS'],
     features: [
-      { text: 'Customer, vendor and rider apps from one monorepo', status: 'in-progress' },
-      { text: 'Live order tracking over Socket.IO', status: 'in-progress' },
-      { text: 'Restaurant order tray and menu management', status: 'in-progress' },
-      { text: 'Cashfree payments and cash-on-delivery collection', status: 'in-progress' },
+      { text: 'Customer app: restaurants, menus, cart, offers and checkout', status: 'shipped' },
+      { text: 'Parcel delivery alongside food ordering', status: 'shipped' },
+      { text: 'Live order and rider tracking on the map', status: 'shipped' },
+      { text: 'Rider app: go online, accept orders, earnings and incentives', status: 'shipped' },
+      { text: 'Restaurant app: order alerts, menu and item availability, wallet', status: 'shipped' },
+      { text: 'Admin panel controlling pricing, zones and app content', status: 'shipped' },
     ],
     architecture: [
-      { layer: 'Clients', detail: 'Customer, rider and vendor apps in React Native with Redux Toolkit; a Vite + React admin panel.' },
-      { layer: 'API', detail: 'Node 20 + Express + TypeScript, with Zod validation shared across apps.' },
-      { layer: 'Real-time', detail: 'Socket.IO with a Redis adapter for order and rider location events.' },
-      { layer: 'Data', detail: 'PostgreSQL 16 and Redis 7; shared domain types as the single source of truth.' },
+      { layer: 'Clients', detail: 'Three Flutter apps (customer, rider, restaurant partner) using GetX for state and routing.' },
+      { layer: 'API', detail: 'Laravel 12 REST API on PHP 8.2 with Passport auth; the same codebase serves the admin panel.' },
+      { layer: 'Real-time', detail: 'Pusher channels for live order status and parcel tracking; Firebase Cloud Messaging for push alerts.' },
+      { layer: 'Data', detail: 'MySQL for orders, menus, zones and wallets; Google Maps for geocoding, places and routes via the backend.' },
+      { layer: 'Delivery', detail: 'Containerised backend on AWS; apps released to Google Play with staged builds.' },
     ],
     challenges: [
       { title: 'Three-sided marketplace', text: 'Customers, restaurants and riders each need their own app and their own view of the same order lifecycle.' },
-      { title: 'One contract, many clients', text: 'A pnpm + Turborepo monorepo of shared types, constants and validation keeps every app in sync.' },
+      { title: 'Food and parcels in one app', text: 'Two businesses with different flows, pricing and payment rules share one customer app without blurring together.' },
+      { title: 'Admin-controlled behaviour', text: 'Pricing, delivery charges and app content come from admin settings, so every change has to be traced from the panel through the API to each app.' },
     ],
-    links: [],
-    note: 'Built at Dendo. Source is proprietary; screenshots to be added.',
+    links: [
+      { label: 'Google Play', href: 'https://play.google.com/store/apps/details?id=com.dendo.update.user' },
+      { label: 'Rider app', href: 'https://play.google.com/store/apps/details?id=com.dendo.update.delivery' },
+      { label: 'Restaurant app', href: 'https://play.google.com/store/apps/details?id=com.dendo.update.store' },
+    ],
+    note: 'Built at Dendo as part of the engineering team. Source is proprietary; screenshots are from the public Google Play listings.',
+  },
+  {
+    id: 'trustlance',
+    index: '03',
+    title: 'TrustLance',
+    category: 'Freelance Marketplace · Full-Stack Web',
+    status: 'Hackathon winner · rebuilt as v2',
+    description:
+      'A freelance marketplace where every contract is funded in escrow before work begins, and every milestone is paid the moment it is approved.',
+    preview: 'image',
+    cover: { file: 'work/trustlance/cover.webp', alt: 'TrustLance landing page with the 3D escrow ring', width: 1600, height: 1040 },
+    accent: '#2DE38E',
+    tech: ['Next.js 15', 'React 19', 'TypeScript', 'Tailwind CSS', 'Supabase', 'PostgreSQL', 'Three.js', 'Genkit + Gemini', 'Razorpay', 'Playwright', 'Vitest'],
+    features: [
+      { text: 'Projects, proposals, contracts and signed terms', status: 'shipped' },
+      { text: 'Escrow-funded milestones with approve, release and refund', status: 'shipped' },
+      { text: 'Coin wallet with a double-entry ledger and bank withdrawals', status: 'shipped' },
+      { text: 'Disputes settled by a conflict-checked arbitrator', status: 'shipped' },
+      { text: 'AI project-risk review and dispute summaries (advice only)', status: 'shipped' },
+      { text: '3D escrow ring driven by real contract data', status: 'shipped' },
+    ],
+    architecture: [
+      { layer: 'Web app', detail: 'Next.js 15 App Router with React 19 and Tailwind: marketing site, auth, and the product (dashboard, work, contracts, messages, disputes, wallet, admin).' },
+      { layer: 'Data', detail: 'Supabase Postgres with row-level security; workflow logic in database functions across 13 ordered migrations, with database tests.' },
+      { layer: 'Money', detail: 'TrustLance Coins (1 coin = ₹1) on a double-entry ledger: purchases via Razorpay, escrow holds, auto-release and verified bank payouts.' },
+      { layer: 'AI', detail: 'Genkit flows on Gemini review project briefs for risk and summarise disputes — they advise, people decide.' },
+      { layer: 'Quality', detail: 'Playwright end-to-end journeys on desktop and mobile, Vitest unit tests.' },
+    ],
+    challenges: [
+      { title: 'Money nobody can quietly move', text: 'Every coin movement is a ledger entry written by service-only database functions, so a milestone is never marked paid until the money actually moved.' },
+      { title: 'From hackathon to product', text: 'Rebuilt the winning prototype from the ground up: a single ordered database history, RLS on every table, and a redesigned interface.' },
+    ],
+    links: [{ label: 'Code', href: 'https://github.com/TheParthi/TRTLance' }],
+    note: 'Won the GDG KSR Web3 Hackathon (Shardeum) as a team project; v2 rebuild led by me. Screens captured from the site running locally.',
   },
   {
     id: 'blockspy',
-    index: '03',
+    index: '04',
     title: 'BlockSpy',
     category: 'AI · Blockchain Security',
     status: 'Concept · CodeClass 2.0 Round 2',
@@ -134,7 +180,7 @@ export const featuredProjects: FeaturedProject[] = [
   },
   {
     id: 'walnut',
-    index: '04',
+    index: '05',
     title: 'Walnut AI',
     fullTitle: 'Automated Walnut Quality and Aflatoxin Risk Detection System Using UV Imaging and AI-Based Analysis',
     category: 'Computer Vision · Artificial Intelligence · IoT',
@@ -166,14 +212,6 @@ export const featuredProjects: FeaturedProject[] = [
 ]
 
 export const archiveProjects: ArchiveProject[] = [
-  {
-    title: 'TrustLance',
-    kind: 'Web3 · Hackathon winner',
-    description: 'Trust-first freelance marketplace with milestone escrow, wallet-linked identity and XMTP encrypted messaging.',
-    tech: ['TypeScript', 'React', 'Node.js', 'Solidity'],
-    links: [{ label: 'Code', href: 'https://github.com/TheParthi/TRTLance' }],
-    note: 'Team project',
-  },
   {
     title: 'Loanify',
     kind: 'AI agents · Fintech',

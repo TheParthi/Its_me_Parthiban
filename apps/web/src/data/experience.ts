@@ -27,14 +27,15 @@ export const milestones: Milestone[] = [
     title: 'Software Engineer Intern',
     org: 'Dendo',
     kind: 'Internship',
-    detail: 'NexaRide ride-hailing platform and the Dendo delivery app.',
+    detail: 'NexaRide ride-hailing platform and the Dendo food & parcel delivery apps — five apps live on Google Play.',
     points: [
       'Ship features on a 48-module NestJS backend — 368 REST endpoints over a 77-model PostgreSQL schema.',
       'Replaced sequential driver assignment with zone-based distance-band broadcast matching.',
       'Added error boundaries and crash reporting that surfaced previously silent client failures.',
       'Contribute to 46 Jest and Supertest suites and a CI pipeline gating every change.',
+      'Build and release Dendo’s Flutter customer, rider and restaurant apps on a Laravel + MySQL backend.',
     ],
-    meta: ['TypeScript', 'NestJS', 'PostGIS', 'Redis', 'React Native'],
+    meta: ['TypeScript', 'NestJS', 'PostGIS', 'Redis', 'React Native', 'Flutter', 'Laravel'],
   },
   {
     date: '2026',

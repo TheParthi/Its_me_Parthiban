@@ -124,7 +124,8 @@ export default function ProjectModal({ project, index, onClose }: { project: Pub
               <h4 className="eyebrow mt-12">Screenshots</h4>
               <ul className="mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2" data-lenis-prevent>
                 {gallery.map((m) => (
-                  <li key={m.id} className="w-[85%] shrink-0 snap-start sm:w-[62%]">
+                  // Fixed height, natural width: phone screenshots stay uncropped next to wide ones.
+                  <li key={m.id} className="shrink-0 snap-start">
                     <a href={safeHref(m.url)} target="_blank" rel="noopener" className="block overflow-hidden rounded-2xl border border-line bg-ink">
                       <img
                         src={safeHref(m.url)}
@@ -133,10 +134,10 @@ export default function ProjectModal({ project, index, onClose }: { project: Pub
                         height={m.height ?? undefined}
                         loading="lazy"
                         decoding="async"
-                        className="aspect-video h-auto w-full object-cover"
+                        className="h-[340px] w-auto max-w-[80vw] object-contain sm:h-[400px]"
                       />
                     </a>
-                    {m.alt && <p className="mt-2 text-xs text-dim">{m.alt}</p>}
+                    {m.alt && <p className="mt-2 max-w-[220px] text-xs text-dim">{m.alt}</p>}
                   </li>
                 ))}
               </ul>

@@ -210,3 +210,7 @@ html[data-section-spacing='spacious'] { --sp-g: 1.25; }
 .md h1, .md h2, .md h3, .md h4 { font-family: var(--font-display); font-weight: 600; color: var(--color-fg); line-height: 1.2; }
 .md blockquote { border-left: 2px solid var(--color-line-2); padding-left: 1em; color: var(--color-mute); }
 .md img { max-width: 100%; border-radius: 12px; }
+
+/* Horizontal screenshot rails: scroll by touch, trackpad or the arrow buttons. */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
